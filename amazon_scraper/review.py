@@ -1,0 +1,82 @@
+import requests
+import dateutil.parser
+from bs4 import BeautifulSoup
+from amazon_scraper import review_url, extract_review_id, process_rating, strip_html_tags, dict_acceptable
+
+
+class Review(object):
+    def __init__(self, id=None, url=None):
+        if id and not url:
+            url = review_url(id)
+
+        if not url:
+            raise ValueError('Invalid review page parameters')
+
+        r = requests.get(url)
+        r.raise_for_status()
+        self.soup = BeautifulSoup(r.text, 'html.parser')
+
+    @property
+    def id(self):
+        anchor = self.soup.find('a', attrs={'name':True}, text=False)
+        id = str(anchor['name'])
+        return id
+
+    @property
+    def asin(self):
+        tag = self.soup.find('abbr', class_='asin')
+        asin = str(tag.string)
+        return asin
+
+    @property
+    def url(self):
+        return review_url(self.id)
+
+    @property
+    def title(self):
+        tag = self.soup.find('span', class_='summary')
+        title = unicode(tag.string)
+        return title.strip()
+
+    @property
+    def rating(self):
+        """The rating of the product normalised to 1.0
+        """
+        for li in self.soup.find_all('li', class_='rating'):
+            string = li.stripped_strings.next().lower()
+            if 'overall:' not in string:
+                continue
+
+            img = li.find('img')
+            rating = unicode(img['title'])
+            return process_rating(rating)
+
+    @property
+    def date(self):
+        abbr = self.soup.find('abbr', class_='dtreviewed')
+        string = str(abbr['title'])
+        # 2011-11-07T05:50:41Z
+        date = dateutil.parser.parse(string)
+        return date
+
+    @property
+    def author(self):
+        # http://www.amazon.com/review/RI3ARYEHW5DT5
+        vcard = self.soup.find('span', class_='reviewer vcard')
+        if vcard:
+            author = unicode(vcard.a.string)
+            return author
+        return None
+
+    @property
+    def text(self):
+        tag = self.soup.find('span', class_='description')
+        return strip_html_tags(unicode(tag))
+
+    def to_dict(self):
+        d = {
+            k:getattr(self, k)
+            for k in dir(self)
+            if dict_acceptable(self, k)
+        }
+        return d

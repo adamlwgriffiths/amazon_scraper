@@ -1,0 +1,67 @@
+import re
+import requests
+from bs4 import BeautifulSoup
+from amazon_scraper import review_url, reviews_url, extract_review_id, dict_acceptable
+
+
+class Reviews(object):
+    def __init__(self, asin=None, url=None):
+        if asin and not url:
+            # check for http://www.amazon.com
+            if 'amazon' in asin:
+                raise ValueError('URL passed as ASIN')
+
+            url = reviews_url(asin)
+
+        if not url:
+            raise ValueError('Invalid review page parameters')
+
+        r = requests.get(url)
+        r.raise_for_status()
+        self.soup = BeautifulSoup(r.text, 'html.parser')
+
+    def __iter__(self):
+        page = self
+        while page:
+            for id in page.ids:
+                yield id
+            page = Reviews(url=page.next_page_url) if page.next_page_url else None
+
+    @property
+    def asin(self):
+        span = self.soup.find('span', class_='asinReviewsSummary', attrs={'name':True})
+        return str(span['name'])
+
+    @property
+    def url(self):
+        return reviews_url(self.asin)
+
+    @property
+    def next_page_url(self):
+        # lazy loading causes this to differ from the HTML visible in chrome
+        anchor = self.soup.find('a', text=re.compile(ur'next', flags=re.I))
+        if anchor:
+            return str(anchor['href'])
+        return None
+
+    @property
+    def ids(self):
+        return [
+            extract_review_id(anchor['href'])
+            for anchor in self.soup.find_all('a', text=re.compile(ur'permalink', flags=re.I))
+        ]
+
+    @property
+    def urls(self):
+        return [
+            review_url(id)
+            for id in self.ids
+        ]
+
+    def to_dict(self):
+        d = {
+            k:getattr(self, k)
+            for k in dir(self)
+            if dict_acceptable(self, k)
+        }
+        return d

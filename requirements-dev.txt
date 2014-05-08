@@ -1,0 +1,2 @@
+-r requirements.txt
+betamax==0.2.0
