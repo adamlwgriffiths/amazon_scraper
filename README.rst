@@ -3,7 +3,7 @@ Amazon Scraper
 ==============
 
 Supplements the standard Amazon API with web scraping functionality to get
-extra data.
+extra data. Specifically, product reviews.
 
 Uses the `Amazon Simple Product API <https://pypi.python.org/pypi/python-amazon-simple-product-api/>`_
 to provide API accessible data. API search functions are imported directly into
