@@ -35,7 +35,7 @@ class AmazonTestCase(unittest.TestCase):
         p.to_dict()
 
     def from_asin(self, ItemId):
-        p = self.amzn.product(ItemId=ItemId)
+        p = self.amzn.lookup(ItemId=ItemId)
         self.verify_product(p)
 
 

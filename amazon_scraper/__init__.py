@@ -124,27 +124,16 @@ class AmazonScraper(object):
     def __init__(self, access_key, secret_key, associate_tag, *args, **kwargs):
         self.api = AmazonAPI(access_key, secret_key, associate_tag, *args)
 
-    def product(self, ItemId=None, URL=None, product=None):
-        if not any((ItemId, URL, product)):
-            raise ValueError('Invalid parameters')
-
-        if not product:
-            if not ItemId:
-                ItemId = extract_asin(URL)
-            else:
-                if 'amazon' in ItemId:
-                    raise ValueError('URL passed as ASIN')
-            product = self.api.lookup(ItemId=ItemId)
-
-        return Product(product)
-
     def reviews(self, ItemId=None, URL=None):
         return Reviews(ItemId, URL)
 
     def review(self, Id=None, URL=None):
         return Review(Id, URL)
 
-    def lookup(self, **kwargs):
+    def lookup(self, URL=None, **kwargs):
+        if URL:
+            kwargs['ItemId'] = extract_asin(URL)
+
         result = self.api.lookup(**kwargs)
         if isinstance(result, (list, tuple)):
             result = [Product(p) for p in result]

@@ -16,6 +16,7 @@ turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (I
 Example
 =======
 
+Create
 ::
 
     >>> from amazon_scraper import AmazonScraper
@@ -33,11 +34,13 @@ Search::
     Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython
     Python Cookbook
 
-Single lookups::
+Lookup by ASIN/ItemId::
 
     >>> p = amzn.lookup(ItemId='B00FLIJJSA')
     >>> p.title
     Kindle, Wi-Fi, 6" E Ink Display - for international shipment
+    >>> p.url
+    http://www.amazon.com/Kindle-Wi-Fi-Ink-Display-international/dp/B0051QVF7A/ref=cm_cr_pr_product_top
 
 
 Batch Lookups::
@@ -49,9 +52,9 @@ Batch Lookups::
     Kindle Paperwhite 3G, 6" High Resolution Display with Next-Gen Built-in Light, Free 3G + Wi-Fi - Includes Special Offers
 
 
-By ASIN/ItemId::
+By URL::
 
-    >>> p = amzn.product(ItemId='B00FLIJJSA')
+    >>> p = amzn.lookup(URL='http://www.amazon.com/Kindle-Wi-Fi-Ink-Display-international/dp/B0051QVF7A/ref=cm_cr_pr_product_top')
     >>> p.title
     Kindle, Wi-Fi, 6" E Ink Display - for international shipment
     >>> p.asin
@@ -60,6 +63,7 @@ By ASIN/ItemId::
 
 View lists of reviews::
 
+    >>> p = amzn.lookup(ItemId='B0051QVF7A')
     >>> rs = amzn.reviews(URL=p.reviews_url)
     >>> rs.asin
     B0051QVF7A
@@ -69,7 +73,15 @@ View lists of reviews::
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
 
 
-Reviews::
+By ASIN/ItemId::
+    >>> rs = amzn.reviews(ItemId='B0051QVF7A')
+    >>> rs.asin
+    B0051QVF7A
+    >>> rs.ids
+    ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
+
+
+Individual reviews::
 
     >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id
@@ -83,6 +95,11 @@ Reviews::
     >>> r.text
     Having been a little overwhelmed by the choices between all the new Kindles ... <snip>
 
+
+By URL::
+    >>> r = amzn.review(URL='http://www.amazon.com/review/R3MF0NIRI3BT1E')
+    >>> r.id
+    R3MF0NIRI3BT1E
 
 
 Authors

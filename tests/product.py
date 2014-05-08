@@ -6,13 +6,17 @@ from tests import AmazonTestCase
 
 class ProductTestCase(AmazonTestCase):
     def test_asin(self):
-        pass
+        self.from_asin(ItemId='B00FLIJJSA')
 
     def test_product(self):
-        pass
+        from amazon_scraper.product import Product
+        p = self.amzn.api.lookup(ItemId='B00FLIJJSA')
+        p = Product(p)
+        p.to_dict()
 
     def test_url(self):
-        pass
+        p = self.amzn.lookup(URL='http://www.amazon.com/Kindle-Wi-Fi-Ink-Display-international/dp/B0051QVF7A/ref=cm_cr_pr_product_top')
+        p.to_dict()
 
     def test_B00FLIJJSA(self):
         # Kindle book
