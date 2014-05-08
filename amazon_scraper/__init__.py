@@ -118,3 +118,21 @@ def dict_acceptable(obj, k, blacklist=None):
 from amazon_scraper.product import Product as product
 from amazon_scraper.reviews import Reviews as reviews
 from amazon_scraper.review import Review as review
+
+
+# wrap search functions
+def lookup(*args, **kwargs):
+    return amazon_api().lookup(*args, **kwargs)
+
+def similarity_lookup(*args, **kwargs):
+    return amazon_api().similarity_lookup(*args, **kwargs)
+
+def browse_node_lookup(*args, **kwargs):
+    return amazon_api().browse_node_lookup(*args, **kwargs)
+
+def search(*args, **kwargs):
+    return amazon_api().search(*args, **kwargs)
+
+def search_n(*args, **kwargs):
+    return amazon_api().search_n(*args, **kwargs)
+

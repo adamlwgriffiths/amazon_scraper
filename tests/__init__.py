@@ -3,7 +3,7 @@ import os
 import json
 import amazon_scraper
 
-class BaseTestCase(unittest.TestCase):
+class AmazonTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -32,3 +32,7 @@ class BaseTestCase(unittest.TestCase):
     def process_product(self, asin):
         p = amazon_scraper.product(asin=asin)
         p.to_dict()
+
+
+if __name__ == '__main__':
+    unittest.main()
