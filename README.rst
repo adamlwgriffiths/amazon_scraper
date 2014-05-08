@@ -9,27 +9,40 @@ Uses the `Amazon Simple Product API <https://pypi.python.org/pypi/python-amazon-
 to provide API accessible data. API search functions are imported directly into
 the amazon_scraper module.
 
+Parameters are kept the same are in the same style as the underlying API, which in
+turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (ItemId).
+
 
 Example
 =======
 
 ::
 
-    >>> import amazon_scraper as amzn
-    >>> amzn.initialise("put your access key", "secret key", "and associate tag here")
-    >>> p = amzn.product(asin='B00FLIJJSA')
+    >>> from amazon_scraper import AmazonScraper
+    >>> amzn = AmazonScraper("put your access key", "secret key", "and associate tag here")
+    >>> for p in amzn.lookup(ItemId='B0051QVF7A,B007HCCNJU,B00BTI6HBS'):
+    >>>     print p.title
+    Kindle, Wi-Fi, 6" E Ink Display - for international shipment
+    Kindle, 6" E Ink Display, Wi-Fi - Includes Special Offers (Black)
+    Kindle Paperwhite 3G, 6" High Resolution Display with Next-Gen Built-in Light, Free 3G + Wi-Fi - Includes Special Offers
+    >>> p = amzn.lookup(ItemId='B00FLIJJSA')
+    >>> p.title
+    Kindle, Wi-Fi, 6" E Ink Display - for international shipment
+    >>> p.title
+    Kindle, Wi-Fi, 6" E Ink Display - for international shipment
+    >>> p = amzn.product(ItemId='B00FLIJJSA')
     >>> p.title
     Kindle, Wi-Fi, 6" E Ink Display - for international shipment
     >>> p.asin
     B0051QVF7A
-    >>> rs = amzn.reviews(url=p.reviews_url)
+    >>> rs = amzn.reviews(URL=p.reviews_url)
     >>> rs.asin
     B0051QVF7A
     >>> rs.ids
     ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
-    >>> r = amzon.review(id=rs.ids[0])
+    >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id
     R3MF0NIRI3BT1E
     >>> r.url
@@ -41,8 +54,7 @@ Example
     >>> r.text
     Having been a little overwhelmed by the choices between all the new Kindles ... <snip>
     >>> import itertools
-    >>> for result in itertools.islice(amzn.search(Keywords='python', SearchIndex='Books'), 5):
-    >>>     p = amzn.product(product=result)
+    >>> for p in itertools.islice(amzn.search(Keywords='python', SearchIndex='Books'), 5):
     >>>     print p.title
     Learning Python, 5th Edition
     Python Programming: An Introduction to Computer Science 2nd Edition

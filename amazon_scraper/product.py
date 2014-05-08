@@ -5,17 +5,8 @@ from amazon_scraper import amazon_api, extract_asin, reviews_url, dict_acceptabl
 
 
 class Product(object):
-    def __init__(self, asin=None, url=None, product=None):
-        if not any((asin, url, product)):
-            raise ValueError('Invalid parameters')
-
-        if product:
-            self.product = product
-        else:
-            if not asin:
-                asin = extract_asin(url)
-
-            self.product = amazon_api().lookup(ItemId=asin)
+    def __init__(self, product):
+        self.product = product
 
     def __getattr__(self, name):
         # allow direct access to the product object

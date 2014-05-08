@@ -115,24 +115,55 @@ def dict_acceptable(obj, k, blacklist=None):
     return is_property(obj, k)
 
 
-from amazon_scraper.product import Product as product
-from amazon_scraper.reviews import Reviews as reviews
-from amazon_scraper.review import Review as review
+from amazon_scraper.product import Product
+from amazon_scraper.reviews import Reviews
+from amazon_scraper.review import Review
 
 
-# wrap search functions
-def lookup(*args, **kwargs):
-    return amazon_api().lookup(*args, **kwargs)
+class AmazonScraper(object):
+    def __init__(self, access_key, secret_key, associate_tag, *args, **kwargs):
+        self.api = AmazonAPI(access_key, secret_key, associate_tag, *args)
 
-def similarity_lookup(*args, **kwargs):
-    return amazon_api().similarity_lookup(*args, **kwargs)
+    def product(self, ItemId=None, URL=None, product=None):
+        if not any((ItemId, URL, product)):
+            raise ValueError('Invalid parameters')
 
-def browse_node_lookup(*args, **kwargs):
-    return amazon_api().browse_node_lookup(*args, **kwargs)
+        if not product:
+            if not ItemId:
+                ItemId = extract_asin(URL)
+            else:
+                if 'amazon' in ItemId:
+                    raise ValueError('URL passed as ASIN')
+            product = self.api.lookup(ItemId=ItemId)
 
-def search(*args, **kwargs):
-    return amazon_api().search(*args, **kwargs)
+        return Product(product)
 
-def search_n(*args, **kwargs):
-    return amazon_api().search_n(*args, **kwargs)
+    def reviews(self, ItemId=None, URL=None):
+        return Reviews(ItemId, URL)
+
+    def review(self, Id=None, URL=None):
+        return Review(Id, URL)
+
+    def lookup(self, **kwargs):
+        result = self.api.lookup(**kwargs)
+        if isinstance(result, (list, tuple)):
+            result = [Product(p) for p in result]
+        else:
+            result = Product(result)
+        return result
+
+    def similarity_lookup(self, **kwargs):
+        for p in self.api.similarity_lookup(**kwargs):
+            yield Product(p)
+
+    def browse_node_lookup(self, **kwargs):
+        return self.api.browse_node_lookup(**kwargs)
+
+    def search(self, **kwargs):
+        for p in self.api.search(**kwargs):
+            yield Product(p)
+
+    def search_n(self, **kwargs):
+        for p in self.api.search_n(**kwargs):
+            yield Product(p)
 

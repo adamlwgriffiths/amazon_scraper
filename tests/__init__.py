@@ -1,9 +1,10 @@
 import unittest
 import os
 import json
-import amazon_scraper
+from amazon_scraper import AmazonScraper
 
 class AmazonTestCase(unittest.TestCase):
+    amzn = None
 
     @classmethod
     def setUpClass(cls):
@@ -27,11 +28,16 @@ class AmazonTestCase(unittest.TestCase):
             k:str(v)
             for k,v in config.iteritems()
         }
-        amazon_scraper.initialise(**config)
+        cls.amzn = AmazonScraper(**config)
 
-    def process_product(self, asin):
-        p = amazon_scraper.product(asin=asin)
+    def verify_product(self, p):
+        # nothing amazon
         p.to_dict()
+
+    def from_asin(self, ItemId):
+        p = self.amzn.product(ItemId=ItemId)
+        self.verify_product(p)
+
 
 
 if __name__ == '__main__':

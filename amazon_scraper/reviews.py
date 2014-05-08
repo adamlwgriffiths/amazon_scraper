@@ -5,18 +5,18 @@ from amazon_scraper import review_url, reviews_url, extract_review_id, dict_acce
 
 
 class Reviews(object):
-    def __init__(self, asin=None, url=None):
-        if asin and not url:
+    def __init__(self, ItemId=None, URL=None):
+        if ItemId and not URL:
             # check for http://www.amazon.com
-            if 'amazon' in asin:
+            if 'amazon' in ItemId:
                 raise ValueError('URL passed as ASIN')
 
-            url = reviews_url(asin)
+            URL = reviews_url(ItemId)
 
-        if not url:
+        if not URL:
             raise ValueError('Invalid review page parameters')
 
-        r = requests.get(url)
+        r = requests.get(URL)
         r.raise_for_status()
         self.soup = BeautifulSoup(r.text, 'html.parser')
 
@@ -25,7 +25,7 @@ class Reviews(object):
         while page:
             for id in page.ids:
                 yield id
-            page = Reviews(url=page.next_page_url) if page.next_page_url else None
+            page = Reviews(URL=page.next_page_url) if page.next_page_url else None
 
     @property
     def asin(self):
