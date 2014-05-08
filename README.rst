@@ -16,8 +16,7 @@ turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (I
 Example
 =======
 
-Create
-::
+Create::
 
     >>> from amazon_scraper import AmazonScraper
     >>> amzn = AmazonScraper("put your access key", "secret key", "and associate tag here")
@@ -33,6 +32,7 @@ Search::
     Python In A Day: Learn The Basics, Learn It Quick, Start Coding Fast (In A Day Books) (Volume 1)
     Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython
     Python Cookbook
+
 
 Lookup by ASIN/ItemId::
 
@@ -74,6 +74,7 @@ View lists of reviews::
 
 
 By ASIN/ItemId::
+
     >>> rs = amzn.reviews(ItemId='B0051QVF7A')
     >>> rs.asin
     B0051QVF7A
