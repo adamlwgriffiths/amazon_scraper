@@ -20,21 +20,46 @@ Example
 
     >>> from amazon_scraper import AmazonScraper
     >>> amzn = AmazonScraper("put your access key", "secret key", "and associate tag here")
+
+
+Search::
+
+    >>> import itertools
+    >>> for p in itertools.islice(amzn.search(Keywords='python', SearchIndex='Books'), 5):
+    >>>     print p.title
+    Learning Python, 5th Edition
+    Python Programming: An Introduction to Computer Science 2nd Edition
+    Python In A Day: Learn The Basics, Learn It Quick, Start Coding Fast (In A Day Books) (Volume 1)
+    Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython
+    Python Cookbook
+
+Single lookups::
+
+    >>> p = amzn.lookup(ItemId='B00FLIJJSA')
+    >>> p.title
+    Kindle, Wi-Fi, 6" E Ink Display - for international shipment
+
+
+Batch Lookups::
+
     >>> for p in amzn.lookup(ItemId='B0051QVF7A,B007HCCNJU,B00BTI6HBS'):
     >>>     print p.title
     Kindle, Wi-Fi, 6" E Ink Display - for international shipment
     Kindle, 6" E Ink Display, Wi-Fi - Includes Special Offers (Black)
     Kindle Paperwhite 3G, 6" High Resolution Display with Next-Gen Built-in Light, Free 3G + Wi-Fi - Includes Special Offers
-    >>> p = amzn.lookup(ItemId='B00FLIJJSA')
-    >>> p.title
-    Kindle, Wi-Fi, 6" E Ink Display - for international shipment
-    >>> p.title
-    Kindle, Wi-Fi, 6" E Ink Display - for international shipment
+
+
+By ASIN/ItemId::
+
     >>> p = amzn.product(ItemId='B00FLIJJSA')
     >>> p.title
     Kindle, Wi-Fi, 6" E Ink Display - for international shipment
     >>> p.asin
     B0051QVF7A
+
+
+View lists of reviews::
+
     >>> rs = amzn.reviews(URL=p.reviews_url)
     >>> rs.asin
     B0051QVF7A
@@ -42,6 +67,10 @@ Example
     ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
+
+
+Reviews::
+
     >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id
     R3MF0NIRI3BT1E
@@ -53,14 +82,7 @@ Example
     FreeSpirit
     >>> r.text
     Having been a little overwhelmed by the choices between all the new Kindles ... <snip>
-    >>> import itertools
-    >>> for p in itertools.islice(amzn.search(Keywords='python', SearchIndex='Books'), 5):
-    >>>     print p.title
-    Learning Python, 5th Edition
-    Python Programming: An Introduction to Computer Science 2nd Edition
-    Python In A Day: Learn The Basics, Learn It Quick, Start Coding Fast (In A Day Books) (Volume 1)
-    Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython
-    Python Cookbook
+
 
 
 Authors
