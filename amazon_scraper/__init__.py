@@ -143,7 +143,7 @@ class AmazonScraper(object):
         for p in self.api.search(**kwargs):
             yield Product(p)
 
-    def search_n(self, **kwargs):
-        for p in self.api.search_n(**kwargs):
+    def search_n(self, n, **kwargs):
+        for p in self.api.search_n(n, **kwargs):
             yield Product(p)
 
