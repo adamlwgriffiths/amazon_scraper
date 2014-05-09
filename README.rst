@@ -13,6 +13,14 @@ Parameters are kept the same are in the same style as the underlying API, which 
 turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (ItemId).
 
 
+Installation
+============
+
+::
+
+    pip install amazon_scraper
+
+
 Example
 =======
 
