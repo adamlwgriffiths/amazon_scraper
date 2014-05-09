@@ -2,6 +2,7 @@ import unittest
 import os
 import json
 from tests import AmazonTestCase
+import amazon_scraper
 
 
 class ProductTestCase(AmazonTestCase):
@@ -18,6 +19,15 @@ class ProductTestCase(AmazonTestCase):
         p = self.amzn.lookup(URL='http://www.amazon.com/Kindle-Wi-Fi-Ink-Display-international/dp/B0051QVF7A/ref=cm_cr_pr_product_top')
         p.to_dict()
 
+    def test_call_through(self):
+        p = self.amzn.lookup(ItemId='B00FLIJJSA')
+        assert p.asin == 'B00FLIJJSA', p.asin
+        assert isinstance(p.price_and_currency, tuple), p.price_and_currency
+
+    def test_reviews_url(self):
+        p = self.amzn.lookup(ItemId='B00FLIJJSA')
+        assert p.reviews_url == amazon_scraper.reviews_url('B00FLIJJSA'), p.reviews_url
+
     def test_B00FLIJJSA(self):
         # Kindle book
         self.from_asin(ItemId='B00FLIJJSA')
@@ -27,6 +37,29 @@ class ProductTestCase(AmazonTestCase):
         # http://www.amazon.com/dp/1589944666
         self.from_asin(ItemId='1589944666')
 
+    @unittest.skip("Need to find product that exhibits this behavior")
+    def test_parent(self):
+        p = self.amzn.lookup(ItemId='0933635869')
+        # parent should be 7th edition 1568821816
+        p.parentAsin
+        assert result == expected, (result, expected)
+
+    def test_alternatives_media_matrix(self):
+        p = self.amzn.lookup(ItemId='1497344824')
+        result = set(p.alternatives)
+        expected = set(['9163192993', 'B00IVM5X7E', 'B00IPXPQ9O', '0899669433', '1482998742', '0441444814'])
+        #expected = set(['9163192993', 'B00IVM5X7E', 'B00IPXPQ9O', '0899669433', '1482998742', '0441444814', 'B00IKFMDMA', 'B00J3GRX02'])
+        assert result == expected, (result, expected)
+
+    def test_alternatives_twisterMediaMatrix(self):
+        p = self.amzn.lookup(ItemId='B00G3L7YT0')
+        result = set(p.alternatives)
+        expected = set(['0425256863',])
+        assert result == expected, (result, expected)
+
+    @unittest.skip("Unavailable items aren't handled yet")
+    def test_unavailable_to_api(self):
+        p = self.amzn.lookup(ItemId='B00IKFMDMA')
 
 if __name__ == '__main__':
     unittest.main()

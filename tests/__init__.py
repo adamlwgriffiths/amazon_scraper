@@ -32,7 +32,9 @@ class AmazonTestCase(unittest.TestCase):
 
     def verify_product(self, p):
         # nothing amazon
-        p.to_dict()
+        d = p.to_dict()
+        assert 'reviews_url' in d, d
+        assert 'alternatives' in d, d
 
     def from_asin(self, ItemId):
         p = self.amzn.lookup(ItemId=ItemId)

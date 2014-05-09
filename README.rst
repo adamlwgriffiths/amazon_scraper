@@ -69,6 +69,22 @@ By URL::
     B0051QVF7A
 
 
+Alternative Bindings::
+
+    >>> p = amzn.lookup(ItemId='B000GRFTPS')
+    >>> p.alternatives
+    ['B00IVM5X7E', '9163192993', '0899669433', 'B00IPXPQ9O', '1482998742', '0441444814', '1497344824']
+    >>> for asin in p.alternatives:
+    >>>     alt = amzn.lookup(ItemId=asin)
+    >>>     print alt.title, alt.binding
+    The King in Yellow Kindle Edition
+    The King in Yellow Unknown Binding
+    King in Yellow Hardcover
+    The Yellow Sign Audible Audio Edition
+    The King in Yellow MP3 CD
+    THE KING IN YELLOW Mass Market Paperback
+    The King in Yellow Paperback
+
 View lists of reviews::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')

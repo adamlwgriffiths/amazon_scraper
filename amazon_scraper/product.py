@@ -1,20 +1,60 @@
 import urlparse
 import json
+import re
 import xmltodict
-from amazon_scraper import extract_asin, reviews_url, dict_acceptable
+import requests
+from bs4 import BeautifulSoup
+from amazon_scraper import product_url, extract_asin, reviews_url, dict_acceptable
 
 
 class Product(object):
     def __init__(self, product):
         self.product = product
+        self._soup = None
 
     def __getattr__(self, name):
         # allow direct access to the product object
-        try:
-            return super(Product, self).__getattr__(name)
-        except AttributeError:
-            # try the api object
-            return getattr(self.__dict__['product'], name)
+        return getattr(self.product, name)
+
+    @property
+    def soup(self):
+        # lazily load the soup
+        # otherwise we will slow down simple operations
+        if not self._soup:
+            url = product_url(self.asin)
+            r = requests.get(url)
+            r.raise_for_status()
+            self._soup = BeautifulSoup(r.text, 'html.parser')
+        return self._soup
+
+    @property
+    def alternatives(self):
+        # TODO: there are FAR more versions hidden behind API calls
+        # it would be nice to get them all
+
+        # kindle
+        tag = self.soup.find('table', class_='twisterMediaMatrix')
+        if tag:
+            asins = set([
+                extract_asin(anchor['href'])
+                for anchor in tag.find_all('a', href=re.compile(ur'/dp/'))
+            ])
+            if self.asin in asins:
+                asins.remove(self.asin)
+            return list(asins)
+
+        # paperback
+        tag = self.soup.find('div', id='MediaMatrix')
+        if tag:
+            asins = set([
+                extract_asin(anchor['href'])
+                for anchor in tag.find_all('a', href=re.compile(ur'/dp/'))
+            ])
+            if self.asin in asins:
+                asins.remove(self.asin)
+            return list(asins)
+
+        return []
 
     @property
     def reviews_url(self):
@@ -56,6 +96,6 @@ class Product(object):
         d.update({
             k:getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k)
+            if dict_acceptable(self, k, ['soup'])
         })
         return d
