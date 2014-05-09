@@ -1,7 +1,7 @@
 import urlparse
 import json
 import xmltodict
-from amazon_scraper import amazon_api, extract_asin, reviews_url, dict_acceptable
+from amazon_scraper import extract_asin, reviews_url, dict_acceptable
 
 
 class Product(object):
