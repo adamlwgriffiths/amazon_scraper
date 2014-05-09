@@ -7,15 +7,6 @@ from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 
 
-_amazon_api=None
-def initialise(access_key, secret_key, associate_tag, *args):
-    global _amazon_api
-    _amazon_api = AmazonAPI(access_key, secret_key, associate_tag, *args)
-
-def amazon_api():
-    global _amazon_api
-    return _amazon_api
-
 _extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
 def extract_asin(url):
     match = _extract_asin_regexp.search(url)
