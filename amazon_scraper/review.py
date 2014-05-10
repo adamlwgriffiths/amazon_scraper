@@ -64,11 +64,15 @@ class Review(object):
 
     @property
     def author(self):
+        # http://www.amazon.com/review/R3MF0NIRI3BT1E
         # http://www.amazon.com/review/RI3ARYEHW5DT5
+        # http://www.amazon.com/review/R2OD03CRAU7EDV
         vcard = self.soup.find('span', class_='reviewer vcard')
         if vcard:
-            author = unicode(vcard.a.string)
-            return author
+            tag = vcard.find(class_='fn')
+            if tag:
+                author = unicode(tag.string)
+                return author
         return None
 
     @property
