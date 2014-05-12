@@ -61,5 +61,20 @@ class ProductTestCase(AmazonTestCase):
     def test_unavailable_to_api(self):
         p = self.amzn.lookup(ItemId='B00IKFMDMA')
 
+    def test_0575081570(self):
+        # has multiple editorial reviews, second onwards not available from API
+        # has author bio not available from API
+        p = self.amzn.lookup(ItemId='0575081570')
+
+        #print ''
+        #print p.soup
+        #print ''
+
+        expected = u'H. P. Lovecraft was born in 1890 in Providence'
+        assert p.author_bio[:len(expected)] == expected, p.author_bio
+        expected = 'http://www.amazon.com/H.P.-Lovecraft/e/B000AQ40D2'
+        assert p.author_page_url[:len(expected)] == expected, p.author_page_url
+
+
 if __name__ == '__main__':
     unittest.main()

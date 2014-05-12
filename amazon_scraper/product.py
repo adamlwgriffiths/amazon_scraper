@@ -4,7 +4,7 @@ import re
 import xmltodict
 import requests
 from bs4 import BeautifulSoup
-from amazon_scraper import product_url, extract_asin, reviews_url, dict_acceptable
+from amazon_scraper import product_url, extract_asin, reviews_url, strip_html_tags, dict_acceptable
 
 
 class Product(object):
@@ -71,6 +71,26 @@ class Product(object):
         reviews = reviews_url(asin)
 
         return reviews
+
+    @property
+    def author_bio(self):
+        tag = self.soup.find('div', class_='mainContent')
+        if tag:
+            text = strip_html_tags(str(tag))
+            if text:
+                return text
+        return None
+
+    @property
+    def author_page_url(self):
+        tag = self.soup.find('div', class_='author_page_link')
+        if tag:
+            a = tag.find('a', href=re.compile(r'/e/',flags=re.I))
+            if a:
+                link = str(a['href'])
+                link = urlparse.urljoin('http://www.amazon.com', link)
+                return link
+        return None
 
     def to_dict(self):
         d = {}
