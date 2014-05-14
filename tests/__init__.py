@@ -1,7 +1,34 @@
 import unittest
 import os
 import json
+import re
+import requests
+from mock import patch, call, Mock
+from betamax import Betamax
 from amazon_scraper import AmazonScraper
+
+
+with Betamax.configure() as config:
+    config.cassette_library_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'cassettes'))
+    config.default_cassette_options['record_mode'] = 'new_episodes'
+
+    if not os.path.exists(config.cassette_library_dir):
+        os.makedirs(config.cassette_library_dir)
+
+# use our own get function instead of requests
+# this way we can cache the response for long term storage
+session = requests.Session()
+cassette_re = re.compile(r'[^a-z0-9]+', flags=re.I)
+def get(*args, **kwargs):
+    '''Intercepts calls to requests.get and redirects them to use BetaMax
+    '''
+    global session
+    # use the url as the cassette
+    cassette = args[0]
+    cassette = cassette_re.sub('', cassette)
+    with Betamax(session).use_cassette(cassette):
+        return session.get(*args, **kwargs)
+
 
 class AmazonTestCase(unittest.TestCase):
     amzn = None
@@ -29,6 +56,14 @@ class AmazonTestCase(unittest.TestCase):
             for k,v in config.iteritems()
         }
         cls.amzn = AmazonScraper(**config)
+
+    def setUp(self):
+        self.patcher = patch('requests.get', side_effect=get)
+        self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
+        pass
 
     def verify_product(self, p):
         # nothing amazon

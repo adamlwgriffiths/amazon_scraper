@@ -5,6 +5,7 @@ import urlparse
 import urllib
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
+from bs4 import BeautifulSoup
 
 
 _extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
@@ -58,27 +59,51 @@ def add_query(url, **kwargs):
     return urlparse.urlunsplit((scheme, netloc, path, query_string, fragment))
 
 def strip_html_tags(html):
+    if html:
+        soup = BeautifulSoup(html)
+        text = soup.findAll(text=True)
+        text = '\n'.join(text).strip()
+        return text
+    return None
+
+"""
+def strip_html_tags(html):
     class MLStripper(HTMLParser):
         def __init__(self):
             self.reset()
             self.fed = []
+
+        @property
+        def type(self):
+            if self.fed:
+                return type(self.fed[0])
+            return None
             
         def handle_starttag(self, tag, attrs):
-            if tag == 'br':
-                self.fed.append('\n')
+            if self.type:
+                if tag == self.type('br'):
+                    self.fed.append(self.type('\n'))
             HTMLParser.handle_starttag(self, tag, attrs)
 
         def handle_startendtag(self, tag, attrs):
-            if tag == 'br':
-                self.fed.append('\n')
+            if self.type:
+                if tag == self.type('br'):
+                    self.fed.append(self.type('\n'))
             HTMLParser.handle_startendtag(self, tag, attrs)
 
         def handle_data(self, d):
-            self.fed.append(d)
+            t = self.type or type(d)
+            self.fed.append(t(d))
+
+        def handle_entityref(self, name):
+            self.fed.append('&%s;' % name)
 
         def get_data(self):
-            data = ' '.join(self.fed)
-            return data.replace('  ', ' ')
+            data = ''
+            if self.type:
+                data = self.type(' ').join(self.fed)
+                data = re.sub(ur'( )+', self.type(' '), data)
+            return data
 
     s = MLStripper()
     # unescape any html chars
@@ -87,10 +112,12 @@ def strip_html_tags(html):
     html = s.unescape(html)
     s.feed(html)
     #Shrink multiple \n into paragraph spacing.
-    data = s.get_data().split(u'\n')
+    data = s.get_data()
+    data = data.split(s.type('\n'))
     data = map(lambda d: d.strip(), data)
     data = filter(bool, data)
-    return u'\n\n'.join(data).strip()
+    return s.type('\n\n').join(data).strip()
+"""
 
 def is_property(obj, k):
     # only accept @property decorated functions

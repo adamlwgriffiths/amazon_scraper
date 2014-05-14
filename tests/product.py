@@ -75,6 +75,10 @@ class ProductTestCase(AmazonTestCase):
         expected = 'http://www.amazon.com/H.P.-Lovecraft/e/B000AQ40D2'
         assert p.author_page_url[:len(expected)] == expected, p.author_page_url
 
+    def test_non_english(self):
+        self.from_asin(ItemId='B00ELPO6WS')
+
+
 
 if __name__ == '__main__':
     unittest.main()
