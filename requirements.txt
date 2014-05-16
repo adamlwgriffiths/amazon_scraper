@@ -1,5 +1,5 @@
-python-amazon-simple-product-api==1.5.0
-xmltodict==0.9.0
-python-dateutil==2.2
-beautifulsoup4==4.3.2
-requests==2.2.1
+python-amazon-simple-product-api
+xmltodict
+python-dateutil
+beautifulsoup4
+requests
