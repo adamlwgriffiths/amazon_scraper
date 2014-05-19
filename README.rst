@@ -69,6 +69,13 @@ By URL::
     B0051QVF7A
 
 
+Product Ratings::
+
+    >>> p = amzn.lookup(ItemId='B00FLIJJSA')
+    >>> p.ratings
+    [8, 4, 6, 4, 13]
+
+
 Alternative Bindings::
 
     >>> p = amzn.lookup(ItemId='B000GRFTPS')

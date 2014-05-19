@@ -74,6 +74,7 @@ class AmazonTestCase(unittest.TestCase):
     def from_asin(self, ItemId):
         p = self.amzn.lookup(ItemId=ItemId)
         self.verify_product(p)
+        return p
 
 
 

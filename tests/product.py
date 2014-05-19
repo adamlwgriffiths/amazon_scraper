@@ -30,12 +30,14 @@ class ProductTestCase(AmazonTestCase):
 
     def test_B00FLIJJSA(self):
         # Kindle book
-        self.from_asin(ItemId='B00FLIJJSA')
+        p = self.from_asin(ItemId='B00FLIJJSA')
+        assert(sum(p.ratings) > 0)
 
     def test_1589944666(self):
         # Call of Cthulhu boardgame
         # http://www.amazon.com/dp/1589944666
-        self.from_asin(ItemId='1589944666')
+        p = self.from_asin(ItemId='1589944666')
+        assert(sum(p.ratings) > 0)
 
     @unittest.skip("Need to find product that exhibits this behavior")
     def test_parent(self):
@@ -78,7 +80,17 @@ class ProductTestCase(AmazonTestCase):
     def test_non_english(self):
         self.from_asin(ItemId='B00ELPO6WS')
 
+    def test_no_reviews(self):
+        p = self.from_asin(ItemId='B00ELPO6WS')
+        assert(isinstance(p.ratings, list))
 
+    def test_ratings_reviews_tag(self):
+        p = self.from_asin(ItemId='B007V8RQC4')
+        assert(sum(p.ratings) > 0)
+
+    def test_ratings_amazon_instant(self):
+        p = self.from_asin(ItemId='B00FGN2HZW')
+        assert(sum(p.ratings) > 0)
 
 if __name__ == '__main__':
     unittest.main()
