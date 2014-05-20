@@ -50,7 +50,6 @@ class ProductTestCase(AmazonTestCase):
         p = self.amzn.lookup(ItemId='1497344824')
         result = set(p.alternatives)
         expected = set(['9163192993', 'B00IVM5X7E', 'B00IPXPQ9O', '0899669433', '1482998742', '0441444814'])
-        #expected = set(['9163192993', 'B00IVM5X7E', 'B00IPXPQ9O', '0899669433', '1482998742', '0441444814', 'B00IKFMDMA', 'B00J3GRX02'])
         assert result == expected, (result, expected)
 
     def test_alternatives_twisterMediaMatrix(self):
@@ -67,11 +66,6 @@ class ProductTestCase(AmazonTestCase):
         # has multiple editorial reviews, second onwards not available from API
         # has author bio not available from API
         p = self.amzn.lookup(ItemId='0575081570')
-
-        #print ''
-        #print p.soup
-        #print ''
-
         expected = u'H. P. Lovecraft was born in 1890 in Providence'
         assert p.author_bio[:len(expected)] == expected, p.author_bio
         expected = 'http://www.amazon.com/H.P.-Lovecraft/e/B000AQ40D2'
@@ -91,6 +85,72 @@ class ProductTestCase(AmazonTestCase):
     def test_ratings_amazon_instant(self):
         p = self.from_asin(ItemId='B00FGN2HZW')
         assert(sum(p.ratings) > 0)
+
+    def test_supplemental_text_frankenstein(self):
+        # Frankenstein
+        p = self.from_asin(ItemId='1593080050')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Our confusion of creator and created'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_text_strange_songs(self):
+        # Strange Songs
+        p = self.from_asin(ItemId='1568822812')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Strange Songs can be heard across time and space'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_text_awoken(self):
+        # Awoken
+        p = self.from_asin(ItemId='1491268727')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Serra Elinsen lives in Trotwood Ohio'
+        assert expected in text, (expected, text)
+        expected = u'Andromeda Slate, the self-proclaimed most ordinary girl in America'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_text_boardgames(self):
+        # Elder Sign
+        p = self.from_asin(ItemId='1616611359')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Elder Sign is a fast-paced, cooperative dice game'
+        assert expected in text, (expected, text)
+
+    @unittest.skip('No reliable way to get this without getting a lot of other crap')
+    def test_supplemental_text_android(self):
+        # Call of Cthulhu: The Wasted Land
+        p = self.from_asin(ItemId='B008A1I0SU')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Call of Cthulhu was originally the title of a novella'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_text_amazon_instant(self):
+        # South Park: Coon vs. Coon & Friends
+        p = self.from_asin(ItemId='B004C0YS5C')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Coon and Friends find themselves at the mercy of Cartman'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_toys(self):
+        # Cthulhu Mini Plush
+        p = self.from_asin(ItemId='B0006FUAD6')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'This absolutely adorable'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_text_pc_game(self):
+        # Wolfenstein: New Order
+        p = self.from_asin(ItemId='B00DHF39KS')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'Europe, 1960. The Nazis turned the tide of the war'
+        assert expected in text, (expected, text)
+
+    def test_supplemental_text_atrocity_archives(self):
+        # Atrocity Archives
+        p = self.from_asin(ItemId='0441016685')
+        text = '\n'.join(p.supplemental_text)
+        expected = u'This dark, funny blend of SF and horror reads like James Bond'
+        assert expected in text, (expected, text)
 
 if __name__ == '__main__':
     unittest.main()

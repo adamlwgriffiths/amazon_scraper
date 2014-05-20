@@ -1,4 +1,5 @@
 import urlparse
+import urllib
 import json
 import re
 import xmltodict
@@ -24,7 +25,8 @@ class Product(object):
             url = product_url(self.asin)
             r = requests.get(url)
             r.raise_for_status()
-            self._soup = BeautifulSoup(r.text, 'html.parser')
+            #self._soup = BeautifulSoup(r.text, 'html.parser')
+            self._soup = BeautifulSoup(r.text, 'html5lib')
         return self._soup
 
     @property
@@ -130,13 +132,90 @@ class Product(object):
 
         return ratings
 
+    @property
+    def supplemental_text(self):
+        # get all the known text blobs
+        # remove any found in editorial reviews
+        result = []
+
+        # kindle
+        # http://www.amazon.com/dp/1593080050
+        tag = self.soup.find('div', id='postBodyPS')
+        if tag:
+            text = strip_html_tags(unicode(tag))
+            if text:
+                result.append(text)
+
+        # paperbacks
+        # http://www.amazon.com/dp/1568822812
+        tag = self.soup.find('div', id='bookDescription_feature_div')
+        if tag:
+            tag = tag.find('div', class_=None)
+            text = strip_html_tags(unicode(tag))
+            if text:
+                result.append(text)
+
+        # extract from the javascript code that updates the iframe
+        # http://www.amazon.com/dp/1491268727
+        tag = self.soup.find('script', text=re.compile(ur'bookDescEncodedData', flags=re.I))
+        if tag:
+            match = re.search(ur'bookDescEncodedData\s=\s"(?P<description>[^",]+)', tag.text)
+            if match:
+                text = match.group('description')
+                text = urllib.unquote(text)
+                text = strip_html_tags(text)
+                if text:
+                    result.append(text)
+
+        # http://www.amazon.com/dp/1616611359
+        for tag in self.soup.find_all('div', class_='productDescriptionWrapper'):
+            text = unicode(tag)
+            text = strip_html_tags(text)
+            if text:
+                result.append(text)
+
+        # android apps
+        # http://www.amazon.com/dp/B008A1I0SU
+        tag = self.soup.find('div', class_='mas-product-description-wrapper')
+        if tag:
+            sub_tag = tag.find('div', class_='content')
+            if sub_tag:
+                tag = sub_tag
+            text = strip_html_tags(unicode(tag))
+            if text:
+                result.append(text)
+
+        # amazon instant video
+        # http://www.amazon.com/dp/B004C0YS5C
+        # older method
+        tag = self.soup.find('div', class_='prod-synopsis')
+        if tag:
+            text = strip_html_tags(unicode(tag))
+            if text:
+                result.append(text)
+        # newer method
+        tag = self.soup.find('div', class_='dv-simple-synopsis')
+        if tag:
+            text = strip_html_tags(unicode(tag))
+            if text:
+                result.append(text)
+
+        # http://www.amazon.com/dp/B0006FUAD6
+        tag = self.soup.find('div', id=re.compile('feature-bullets',flags=re.I))
+        if tag:
+            tags = map(unicode, tag.find_all('span'))
+            text = strip_html_tags(u''.join(tags))
+            if text:
+                result.append(text)
+
+        return result
+
     def to_dict(self):
         d = {}
         # print the object as an xml string, parse the string to a dict
         # good times!
         # this hack brought to you by the letters: X, M, L and by the
         # words: Bad, and Design
-        #d.update(xmltodict.parse(self.product.to_string()))
         d = xmltodict.parse(self.product.to_string())
         d = json.loads(json.dumps(d))
 

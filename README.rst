@@ -92,6 +92,14 @@ Alternative Bindings::
     THE KING IN YELLOW Mass Market Paperback
     The King in Yellow Paperback
 
+
+Supplemental text not available via the API::
+
+    >>> p = amzn.lookup(ItemId='0441016685')
+    >>> p.supplemental_text
+    [u"Bob Howard is a computer-hacker desk jockey ... ", u"Lovecraft\'s Cthulhu meets Len Deighton\'s spies ... ", u"This dark, funny blend of SF and ... "]
+
+
 View lists of reviews::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')

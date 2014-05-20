@@ -3,3 +3,4 @@ xmltodict
 python-dateutil
 beautifulsoup4
 requests
+html5lib
