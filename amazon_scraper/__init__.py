@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import re
 import urlparse
 import urllib
+import functools
+import time
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 from bs4 import BeautifulSoup
@@ -65,6 +67,28 @@ def strip_html_tags(html):
         text = '\n'.join(text).strip()
         return text
     return None
+
+def retry(retries=3, delay=1.0, exceptions=None):
+    if not exceptions:
+        exceptions = (BaseException,)
+
+    def outer(fn):
+        @functools.wraps(fn)
+        def decorator(*args, **kwargs):
+            for attempt in range(retries):
+                try:
+                    if attempt > 0:
+                        print '{0}({1}, {2}) - Attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt + 1, retries)
+                    return fn(*args, **kwargs)
+                except BaseException as e:
+                    if not isinstance(e, exceptions):
+                        raise
+                    if attempt == (retries - 1):
+                        print '{0}({1}, {2}) - Failed!'.format(fn.__name__, args, kwargs)
+                        time.sleep(delay)
+                        raise e
+        return decorator
+    return outer
 
 """
 def strip_html_tags(html):

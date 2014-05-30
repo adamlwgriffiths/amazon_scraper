@@ -5,7 +5,7 @@ import re
 import xmltodict
 import requests
 from bs4 import BeautifulSoup
-from amazon_scraper import product_url, extract_asin, reviews_url, strip_html_tags, dict_acceptable
+from amazon_scraper import product_url, extract_asin, reviews_url, strip_html_tags, dict_acceptable, retry
 
 
 class Product(object):
@@ -18,6 +18,7 @@ class Product(object):
         return getattr(self.product, name)
 
     @property
+    @retry()
     def soup(self):
         # lazily load the soup
         # otherwise we will slow down simple operations
