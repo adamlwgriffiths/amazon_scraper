@@ -64,11 +64,14 @@ def strip_html_tags(html):
     if html:
         soup = BeautifulSoup(html)
         text = soup.findAll(text=True)
-        text = '\n'.join(text).strip()
+        text = u'\n'.join(text).strip()
         return text
     return None
 
 def retry(retries=3, delay=1.2, exceptions=None):
+    original_delay = delay
+    # store in a list so our closure can access it
+    delay = [delay]
     if not exceptions:
         exceptions = (BaseException,)
 
@@ -78,15 +81,20 @@ def retry(retries=3, delay=1.2, exceptions=None):
             for attempt in range(retries):
                 try:
                     if attempt > 0:
-                        print '{0}({1}, {2}) - Attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt + 1, retries)
-                    return fn(*args, **kwargs)
+                        print '{0}({1}, {2}) - Retry attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt + 1, retries)
+                    result = fn(*args, **kwargs)
+                    # reset our delay on a success
+                    delay[0] = original_delay
+                    return result
                 except BaseException as e:
                     if not isinstance(e, exceptions):
                         raise
-                    if attempt == (retries - 1):
-                        print '{0}({1}, {2}) - Failed!'.format(fn.__name__, args, kwargs)
+                    if attempt >= (retries - 1):
+                        print '{0}({1}, {2}) - Retry limit exceeded'.format(fn.__name__, args, kwargs)
                         raise e
-                    time.sleep(delay)
+                    time.sleep(delay[0])
+                    # wait longer next time
+                    delay[0] += 0.5
         return decorator
     return outer
 
