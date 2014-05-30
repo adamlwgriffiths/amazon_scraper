@@ -11,7 +11,7 @@ with open('README.rst') as f:
 
 setup(
     name="amazon_scraper",
-    version='0.1.9',
+    version='0.1.10',
     description="Provides content not accessible through the standard Amazon API",
     long_description=long_description,
     license = 'BSD',
