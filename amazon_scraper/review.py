@@ -22,13 +22,13 @@ class Review(object):
     @property
     def id(self):
         anchor = self.soup.find('a', attrs={'name':True}, text=False)
-        id = str(anchor['name'])
+        id = unicode(anchor['name'])
         return id
 
     @property
     def asin(self):
         tag = self.soup.find('abbr', class_='asin')
-        asin = str(tag.string)
+        asin = unicode(tag.string)
         return asin
 
     @property
@@ -57,7 +57,7 @@ class Review(object):
     @property
     def date(self):
         abbr = self.soup.find('abbr', class_='dtreviewed')
-        string = str(abbr['title'])
+        string = unicode(abbr['title'])
         # 2011-11-07T05:50:41Z
         date = dateutil.parser.parse(string)
         return date

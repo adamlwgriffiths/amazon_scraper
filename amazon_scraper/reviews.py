@@ -30,7 +30,7 @@ class Reviews(object):
     @property
     def asin(self):
         span = self.soup.find('span', class_='asinReviewsSummary', attrs={'name':True})
-        return str(span['name'])
+        return unicode(span['name'])
 
     @property
     def url(self):
@@ -41,7 +41,7 @@ class Reviews(object):
         # lazy loading causes this to differ from the HTML visible in chrome
         anchor = self.soup.find('a', text=re.compile(ur'next', flags=re.I))
         if anchor:
-            return str(anchor['href'])
+            return unicode(anchor['href'])
         return None
 
     @property

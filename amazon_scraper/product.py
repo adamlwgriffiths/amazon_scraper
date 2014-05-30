@@ -64,7 +64,7 @@ class Product(object):
         # but some products actually use the ISBN for the review url
         # and the ASIN version would fail
         # so we'll get the url given to us, and get the asin/isbn from that
-        url = str(self.product.item['CustomerReviews']['IFrameURL'])
+        url = unicode(self.product.item['CustomerReviews']['IFrameURL'])
 
         p = urlparse.urlparse(url)
         q = urlparse.parse_qs(p.query)
@@ -78,7 +78,7 @@ class Product(object):
     def author_bio(self):
         tag = self.soup.find('div', class_='mainContent')
         if tag:
-            text = strip_html_tags(str(tag))
+            text = strip_html_tags(unicode(tag))
             if text:
                 return text
         return None
@@ -89,7 +89,7 @@ class Product(object):
         if tag:
             a = tag.find('a', href=re.compile(r'/e/',flags=re.I))
             if a:
-                link = str(a['href'])
+                link = unicode(a['href'])
                 link = urlparse.urljoin('http://www.amazon.com', link)
                 return link
         return None
