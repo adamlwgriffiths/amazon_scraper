@@ -68,7 +68,7 @@ def strip_html_tags(html):
         return text
     return None
 
-def retry(retries=3, delay=1.2, exceptions=None):
+def retry(retries=5, delay=1.2, exceptions=None):
     original_delay = delay
     # store in a list so our closure can access it
     delay = [delay]
@@ -94,7 +94,7 @@ def retry(retries=3, delay=1.2, exceptions=None):
                         raise e
                     time.sleep(delay[0])
                     # wait longer next time
-                    delay[0] += 0.5
+                    delay[0] += 1.0
         return decorator
     return outer
 
