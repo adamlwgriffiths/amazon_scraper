@@ -17,7 +17,9 @@ class Reviews(object):
             raise ValueError('Invalid review page parameters')
 
         self._URL = URL
+        self._soup = None
 
+    @property
     @retry()
     def soup(self):
         if not self._soup:
@@ -68,6 +70,6 @@ class Reviews(object):
         d = {
             k:getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k)
+            if dict_acceptable(self, k, blacklist=['soup', '_URL', '_soup'])
         }
         return d

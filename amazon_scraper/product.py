@@ -227,13 +227,13 @@ class Product(object):
         d.update({
             k:getattr(self.product, k)
             for k in dir(self.product)
-            if dict_acceptable(self.product, k, ['browse_nodes'])
+            if dict_acceptable(self.product, k, blacklist=['browse_nodes'])
         })
 
         # add our own properties
         d.update({
             k:getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k, ['soup'])
+            if dict_acceptable(self, k, blacklist=['soup'])
         })
         return d
