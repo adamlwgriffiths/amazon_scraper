@@ -70,6 +70,7 @@ def strip_html_tags(html):
 
 def retry(retries=5, delay=1.2, exceptions=None):
     original_delay = delay
+    delay_increment = 1.0
     # store in a list so our closure can access it
     delay = [delay]
     if not exceptions:
@@ -78,10 +79,10 @@ def retry(retries=5, delay=1.2, exceptions=None):
     def outer(fn):
         @functools.wraps(fn)
         def decorator(*args, **kwargs):
-            for attempt in range(retries):
+            for attempt in range(1, retries + 1):
                 try:
-                    if attempt > 0:
-                        print '{0}({1}, {2}) - Retry attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt + 1, retries)
+                    if attempt > 1:
+                        print '{0}({1}, {2}) - Retry attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt, retries)
                     result = fn(*args, **kwargs)
                     # reset our delay on a success
                     delay[0] = original_delay
@@ -89,12 +90,12 @@ def retry(retries=5, delay=1.2, exceptions=None):
                 except BaseException as e:
                     if not isinstance(e, exceptions):
                         raise
-                    if attempt >= (retries - 1):
+                    if attempt >= retries:
                         print '{0}({1}, {2}) - Retry limit exceeded'.format(fn.__name__, args, kwargs)
                         raise e
                     time.sleep(delay[0])
                     # wait longer next time
-                    delay[0] += 1.0
+                    delay[0] += delay_increment  * attempt
         return decorator
     return outer
 
