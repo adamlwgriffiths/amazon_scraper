@@ -68,7 +68,7 @@ def strip_html_tags(html):
         return text
     return None
 
-def retry(retries=3, delay=1.0, exceptions=None):
+def retry(retries=3, delay=1.2, exceptions=None):
     if not exceptions:
         exceptions = (BaseException,)
 
@@ -85,8 +85,8 @@ def retry(retries=3, delay=1.0, exceptions=None):
                         raise
                     if attempt == (retries - 1):
                         print '{0}({1}, {2}) - Failed!'.format(fn.__name__, args, kwargs)
-                        time.sleep(delay)
                         raise e
+                    time.sleep(delay)
         return decorator
     return outer
 
