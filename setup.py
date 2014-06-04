@@ -9,9 +9,11 @@ from setuptools import setup, Extension
 with open('README.rst') as f:
     long_description = f.read()
 
+exec(open('amazon_scraper/version.py').read())
+
 setup(
     name="amazon_scraper",
-    version='0.1.15',
+    version=__version__,
     description="Provides content not accessible through the standard Amazon API",
     long_description=long_description,
     license = 'BSD',

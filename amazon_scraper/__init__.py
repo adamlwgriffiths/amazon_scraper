@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
+# load our version
+from .version import __version__
+
 import re
 import urlparse
 import urllib
