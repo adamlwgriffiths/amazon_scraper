@@ -31,6 +31,10 @@ class Product(object):
         return self._soup
 
     @property
+    def url(self):
+        return product_url(self.asin)
+
+    @property
     def alternatives(self):
         # TODO: there are FAR more versions hidden behind API calls
         # it would be nice to get them all
