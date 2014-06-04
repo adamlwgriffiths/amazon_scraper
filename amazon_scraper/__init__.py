@@ -170,7 +170,7 @@ from amazon_scraper.review import Review
 
 class AmazonScraper(object):
     def __init__(self, access_key, secret_key, associate_tag, *args, **kwargs):
-        self.api = AmazonAPI(access_key, secret_key, associate_tag, *args)
+        self.api = AmazonAPI(access_key, secret_key, associate_tag, *args, **kwargs)
 
     def reviews(self, ItemId=None, URL=None):
         return Reviews(ItemId, URL)
