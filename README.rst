@@ -13,6 +13,10 @@ Parameters are kept the same are in the same style as the underlying API, which 
 turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (ItemId).
 
 
+The AmazonScraper constructor will pass 'kwargs' to `Bottlenose <https://github.com/lionheart/bottlenose>`_ (via Amazon Simple Product API).
+Bottlenose supports AWS regions, queries per second limiting, query caching and other nice features. Please view Bottlenose' API for more information on this.
+
+
 Installation
 ============
 
@@ -24,10 +28,16 @@ Installation
 Example
 =======
 
-Create::
+Create an API instance::
 
     >>> from amazon_scraper import AmazonScraper
     >>> amzn = AmazonScraper("put your access key", "secret key", "and associate tag here")
+
+
+The creation function accepts 'kwargs' which are passed to 'bottlenose.Amazon' constructor::
+
+    >>> from amazon_scraper import AmazonScraper
+    >>> amzn = AmazonScraper("put your access key", "secret key", "and associate tag here", Region='UK', MaxQPS=0.9, Timeout=5.0)
 
 
 Search::
