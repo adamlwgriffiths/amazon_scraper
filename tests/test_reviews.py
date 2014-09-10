@@ -26,6 +26,10 @@ class SearchTestCase(AmazonTestCase):
         assert r.author == u'FreeSpirit', r.author
         r.to_dict()
 
+    def test_review_asin(self):
+        r = self.amzn.review(URL='http://www.amazon.com/review/R3MF0NIRI3BT1E')
+        assert r.asin == 'B00492CIC8'
+
     def test_review_url(self):
         r = self.amzn.review(URL='http://www.amazon.com/review/R3MF0NIRI3BT1E')
         r.to_dict()
