@@ -136,6 +136,8 @@ Individual reviews::
     >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id
     R3MF0NIRI3BT1E
+    >>> r.asin
+    B00492CIC8
     >>> r.url
     http://www.amazon.com/review/R3MF0NIRI3BT1E
     >>> r.date
