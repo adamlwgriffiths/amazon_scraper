@@ -16,6 +16,26 @@ turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (I
 The AmazonScraper constructor will pass 'kwargs' to `Bottlenose <https://github.com/lionheart/bottlenose>`_ (via Amazon Simple Product API).
 Bottlenose supports AWS regions, queries per second limiting, query caching and other nice features. Please view Bottlenose' API for more information on this.
 
+The latest version of python-amazon-simple-product-api (1.5.0 at time of writing), doesn't support these arguemnts, only Region.
+If you require these, please use the latest code from their repository with the following command::
+
+    pip install git+https://github.com/yoavaviram/python-amazon-simple-product-api.git#egg=python-amazon-simple-product-api
+
+
+Caveat
+======
+
+Amazon continually A/B test and throw out new HTML to keep scrapers from working.
+
+Amazon have resorted to moving more and more content into iFrames which this scraper can't handle.
+
+I envisage a time where most data will be inaccessible without more complex logic.
+
+I've spent a long time trying to get these scrapers working and it's a never ending battle.
+I don't have the time to continually keep up the pace with Amazon.
+If you are interested in improving Amazon Scraper, please let me know (creating an issue is fine).
+Any help is appreciated.
+
 
 Installation
 ============
