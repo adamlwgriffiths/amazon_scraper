@@ -25,10 +25,14 @@ If you require these, please use the latest code from their repository with the 
 Caveat
 ======
 
-Amazon continually A/B test and throw out new HTML to keep scrapers from working.
+Amazon continually try and keep scrapers from working, they do this by:
+
+* A/B testing (randomly receive different HTML).
+* Huge numbers of HTML layouts for the same product categories.
+* Changing HTML layouts.
+* Moving content inside iFrames.
 
 Amazon have resorted to moving more and more content into iFrames which this scraper can't handle.
-
 I envisage a time where most data will be inaccessible without more complex logic.
 
 I've spent a long time trying to get these scrapers working and it's a never ending battle.
