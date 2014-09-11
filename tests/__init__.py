@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import unittest
 import os
 import json
@@ -6,6 +7,7 @@ import requests
 from mock import patch, call, Mock
 from betamax import Betamax
 from amazon_scraper import AmazonScraper
+from amazon_scraper.product import Product
 
 
 with Betamax.configure() as config:
@@ -44,7 +46,7 @@ class AmazonTestCase(unittest.TestCase):
             assert config['associate_tag']
         except:
             raise AssertionError('''
-                config.json must be created with the following format:
+                tests/config.json must be created with the following format:
                     {
                         "access_key":"KEY GOES HERE",
                         "secret_key":"secret key goes here,
@@ -55,7 +57,7 @@ class AmazonTestCase(unittest.TestCase):
             k:str(v)
             for k,v in config.iteritems()
         }
-        cls.amzn = AmazonScraper(**config)
+        cls.amzn = AmazonScraper(MaxQPS=0.5, **config)
 
     def setUp(self):
         self.patcher = patch('requests.get', side_effect=get)
@@ -67,6 +69,7 @@ class AmazonTestCase(unittest.TestCase):
 
     def verify_product(self, p):
         # nothing amazon
+        assert type(p) == Product
         d = p.to_dict()
         assert 'reviews_url' in d, d
         assert 'alternatives' in d, d

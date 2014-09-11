@@ -4,15 +4,21 @@ from __future__ import absolute_import
 # load our version
 from .version import __version__
 
+import logging
 import re
 import urlparse
 import urllib
 import functools
 import time
+import requests
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 from bs4 import BeautifulSoup
 
+log = logging.getLogger(__name__)
+
+#user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
+user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36'
 
 _extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
 def extract_asin(url):
@@ -40,6 +46,11 @@ def process_rating(text):
     """
     rating_match = _process_rating_regexp.search(text)
     return float(rating_match.group(1)) / 5.0
+
+_extract_reviews_id_regexp = re.compile(r'/product-reviews/(?P<id>[^/]+)', flags=re.I)
+def extract_reviews_id(url):
+    match = _extract_reviews_id_regexp.search(url)
+    return str(match.group('id'))
 
 _extract_review_id_regexp = re.compile(r'/review/(?P<id>[^/]+)', flags=re.I)
 def extract_review_id(url):
@@ -72,11 +83,7 @@ def strip_html_tags(html):
         return text
     return None
 
-def retry(retries=5, MaxQPS=0.9, exceptions=None):
-    delay = 0.
-    if MaxQPS:
-        1. / float(MaxQPS)
-
+def retry(retries=5, exceptions=None):
     if not exceptions:
         exceptions = (BaseException,)
 
@@ -86,72 +93,17 @@ def retry(retries=5, MaxQPS=0.9, exceptions=None):
             for attempt in range(1, retries + 1):
                 try:
                     if attempt > 1:
-                        print '{0}({1}, {2}) - Retry attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt, retries)
+                        log.debug('{0}({1}, {2}) - Retry attempt {3}/{4}'.format(fn.__name__, args, kwargs, attempt, retries))
                     result = fn(*args, **kwargs)
                     return result
                 except BaseException as e:
                     if not isinstance(e, exceptions):
                         raise
                     if attempt >= retries:
-                        print '{0}({1}, {2}) - Retry limit exceeded'.format(fn.__name__, args, kwargs)
+                        log.debug('{0}({1}, {2}) - Retry limit exceeded'.format(fn.__name__, args, kwargs))
                         raise e
-                    if delay:
-                        time.sleep(delay)
         return decorator
     return outer
-
-"""
-def strip_html_tags(html):
-    class MLStripper(HTMLParser):
-        def __init__(self):
-            self.reset()
-            self.fed = []
-
-        @property
-        def type(self):
-            if self.fed:
-                return type(self.fed[0])
-            return None
-            
-        def handle_starttag(self, tag, attrs):
-            if self.type:
-                if tag == self.type('br'):
-                    self.fed.append(self.type('\n'))
-            HTMLParser.handle_starttag(self, tag, attrs)
-
-        def handle_startendtag(self, tag, attrs):
-            if self.type:
-                if tag == self.type('br'):
-                    self.fed.append(self.type('\n'))
-            HTMLParser.handle_startendtag(self, tag, attrs)
-
-        def handle_data(self, d):
-            t = self.type or type(d)
-            self.fed.append(t(d))
-
-        def handle_entityref(self, name):
-            self.fed.append('&%s;' % name)
-
-        def get_data(self):
-            data = ''
-            if self.type:
-                data = self.type(' ').join(self.fed)
-                data = re.sub(ur'( )+', self.type(' '), data)
-            return data
-
-    s = MLStripper()
-    # unescape any html chars
-    # ie: in the blurb for http://www.amazon.com/dp/1491268727
-    # the word unicode ' in R'lyeh (R&#x2019;lyeh) gets stripped unless we escape it first
-    html = s.unescape(html)
-    s.feed(html)
-    #Shrink multiple \n into paragraph spacing.
-    data = s.get_data()
-    data = data.split(s.type('\n'))
-    data = map(lambda d: d.strip(), data)
-    data = filter(bool, data)
-    return s.type('\n\n').join(data).strip()
-"""
 
 def is_property(obj, k):
     # only accept @property decorated functions
@@ -162,10 +114,27 @@ def is_property(obj, k):
     return False
 
 def dict_acceptable(obj, k, blacklist=None):
+    # don't store blacklisted variables
     if blacklist and k in blacklist:
+        return False
+    # don't store hidden variables
+    if k.startswith('_'):
         return False
     return is_property(obj, k)
 
+def rate_limit(api):
+    # apply rate limiting
+    # this is taken from bottlenose/api.py
+    # AmazonScraper -> SimpleProductAPI -> BottleNose
+    api = api.api.api
+    if api.MaxQPS:
+        last_query_time = api._last_query_time[0]
+        if last_query_time:
+                wait_time = 1 / api.MaxQPS - (time.time() - last_query_time)
+                if wait_time > 0:
+                    log.debug('Waiting %.3fs to call Amazon API' % wait_time)
+                    time.sleep(wait_time)
+        api._last_query_time[0] = time.time()
 
 from amazon_scraper.product import Product
 from amazon_scraper.reviews import Reviews
@@ -177,10 +146,10 @@ class AmazonScraper(object):
         self.api = AmazonAPI(access_key, secret_key, associate_tag, *args, **kwargs)
 
     def reviews(self, ItemId=None, URL=None):
-        return Reviews(ItemId, URL)
+        return Reviews(self, ItemId, URL)
 
     def review(self, Id=None, URL=None):
-        return Review(Id, URL)
+        return Review(self, Id, URL)
 
     def lookup(self, URL=None, **kwargs):
         if URL:

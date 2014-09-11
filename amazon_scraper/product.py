@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import urlparse
 import urllib
 import json
@@ -5,7 +6,7 @@ import re
 import xmltodict
 import requests
 from bs4 import BeautifulSoup
-from amazon_scraper import product_url, extract_asin, reviews_url, strip_html_tags, dict_acceptable, retry
+from amazon_scraper import product_url, extract_asin, reviews_url, strip_html_tags, dict_acceptable, retry, rate_limit, extract_reviews_id, user_agent
 
 
 class Product(object):
@@ -24,7 +25,9 @@ class Product(object):
         # otherwise we will slow down simple operations
         if not self._soup:
             url = product_url(self.asin)
-            r = requests.get(url)
+            rate_limit(self.api)
+            # verify=False ignores SSL errors
+            r = requests.get(url, headers={'User-Agent':user_agent}, verify=False)
             r.raise_for_status()
             #self._soup = BeautifulSoup(r.text, 'html.parser')
             self._soup = BeautifulSoup(r.text, 'html5lib')
@@ -69,11 +72,19 @@ class Product(object):
         # but some products actually use the ISBN for the review url
         # and the ASIN version would fail
         # so we'll get the url given to us, and get the asin/isbn from that
-        url = unicode(self.product.item['CustomerReviews']['IFrameURL'])
+        try:
+            # the variable has changed in python simple product api, sigh
+            item = getattr(self.product, 'item', None)
+            if not item:
+                item = getattr(self.product, 'parsed_response', None)
 
-        p = urlparse.urlparse(url)
-        q = urlparse.parse_qs(p.query)
-        asin = q['asin'][0]
+            url = unicode(item['CustomerReviews']['IFrameURL'])
+
+            p = urlparse.urlparse(url)
+            q = urlparse.parse_qs(p.query)
+            asin = q['asin'][0]
+        except Exception as e:
+            asin = self.asin
 
         reviews = reviews_url(asin)
 
@@ -231,13 +242,13 @@ class Product(object):
         d.update({
             k:getattr(self.product, k)
             for k in dir(self.product)
-            if dict_acceptable(self.product, k, blacklist=['browse_nodes'])
+            if dict_acceptable(self.product, k, blacklist=['browse_nodes', 'api'])
         })
 
         # add our own properties
         d.update({
             k:getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k, blacklist=['soup'])
+            if dict_acceptable(self, k, blacklist=['soup', 'api'])
         })
         return d

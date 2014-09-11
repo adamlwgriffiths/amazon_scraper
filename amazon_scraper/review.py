@@ -1,11 +1,12 @@
+from __future__ import absolute_import
 import requests
 import dateutil.parser
 from bs4 import BeautifulSoup
-from amazon_scraper import review_url, extract_review_id, process_rating, strip_html_tags, dict_acceptable, retry
+from amazon_scraper import review_url, extract_review_id, process_rating, strip_html_tags, dict_acceptable, retry, rate_limit, user_agent
 
 
 class Review(object):
-    def __init__(self, Id=None, URL=None):
+    def __init__(self, api, Id=None, URL=None):
         if Id and not URL:
             if 'amazon' in Id:
                 raise ValueError('URL passed as ID')
@@ -15,6 +16,7 @@ class Review(object):
         if not URL:
             raise ValueError('Invalid review page parameters')
 
+        self.api = api
         self._URL = URL
         self._soup = None
 
@@ -22,9 +24,11 @@ class Review(object):
     @retry()
     def soup(self):
         if not self._soup:
-            r = requests.get(self._URL)
+            rate_limit(self.api)
+            r = requests.get(self._URL, headers={'User-Agent':user_agent}, verify=False)
             r.raise_for_status()
-            self._soup = BeautifulSoup(r.text, 'html.parser')
+            #self._soup = BeautifulSoup(r.text, 'html.parser')
+            self._soup = BeautifulSoup(r.text, 'html5lib')
         return self._soup
 
     @property

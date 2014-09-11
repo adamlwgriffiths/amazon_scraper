@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 import unittest
 import os
 import itertools
 from tests import AmazonTestCase
+
 
 class SearchTestCase(AmazonTestCase):
     def test_search(self):

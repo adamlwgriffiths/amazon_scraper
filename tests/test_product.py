@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import unittest
 import os
 import json
@@ -49,25 +50,30 @@ class ProductTestCase(AmazonTestCase):
     def test_alternatives_media_matrix(self):
         p = self.amzn.lookup(ItemId='1497344824')
         result = set(p.alternatives)
-        expected = set(['9163192993', 'B00IVM5X7E', 'B00IPXPQ9O', '0899669433', '1482998742', '0441444814'])
+        expected = set(['B00JDKVW46', '0554320738', '1482998750', 'B001CJXD48', 'B00J3GRX02', '0441444822'])
         assert result == expected, (result, expected)
 
     def test_alternatives_twisterMediaMatrix(self):
         p = self.amzn.lookup(ItemId='B00G3L7YT0')
         result = set(p.alternatives)
-        expected = set(['0425256863',])
+        expected = set(['0425256863','B00FLY3XP4'])
         assert result == expected, (result, expected)
 
     @unittest.skip("Unavailable items aren't handled yet")
     def test_unavailable_to_api(self):
         p = self.amzn.lookup(ItemId='B00IKFMDMA')
 
-    def test_0575081570(self):
+    @unittest.skip("Author bio is now missing")
+    def test_0575081570_author_bio(self):
         # has multiple editorial reviews, second onwards not available from API
         # has author bio not available from API
         p = self.amzn.lookup(ItemId='0575081570')
         expected = u'H. P. Lovecraft was born in 1890 in Providence'
         assert p.author_bio[:len(expected)] == expected, p.author_bio
+
+    @unittest.skip("Author page url is now missing")
+    def test_0575081570_author_page_url(self):
+        p = self.amzn.lookup(ItemId='0575081570')
         expected = 'http://www.amazon.com/H.P.-Lovecraft/e/B000AQ40D2'
         assert p.author_page_url[:len(expected)] == expected, p.author_page_url
 
@@ -86,6 +92,7 @@ class ProductTestCase(AmazonTestCase):
         p = self.from_asin(ItemId='B00FGN2HZW')
         assert(sum(p.ratings) > 0)
 
+    @unittest.skip("Text now hidden in iFrame")
     def test_supplemental_text_frankenstein(self):
         # Frankenstein
         p = self.from_asin(ItemId='1593080050')
@@ -100,6 +107,7 @@ class ProductTestCase(AmazonTestCase):
         expected = u'Strange Songs can be heard across time and space'
         assert expected in text, (expected, text)
 
+    @unittest.skip("Text now hidden in iFrame")
     def test_supplemental_text_awoken(self):
         # Awoken
         p = self.from_asin(ItemId='1491268727')
@@ -109,6 +117,7 @@ class ProductTestCase(AmazonTestCase):
         expected = u'Andromeda Slate, the self-proclaimed most ordinary girl in America'
         assert expected in text, (expected, text)
 
+    @unittest.skip("Text now hidden in iFrame")
     def test_supplemental_text_boardgames(self):
         # Elder Sign
         p = self.from_asin(ItemId='1616611359')
@@ -131,6 +140,7 @@ class ProductTestCase(AmazonTestCase):
         expected = u'Coon and Friends find themselves at the mercy of Cartman'
         assert expected in text, (expected, text)
 
+    @unittest.skip("Text now hidden in iFrame")
     def test_supplemental_toys(self):
         # Cthulhu Mini Plush
         p = self.from_asin(ItemId='B0006FUAD6')
@@ -145,12 +155,16 @@ class ProductTestCase(AmazonTestCase):
         expected = u'Europe, 1960. The Nazis turned the tide of the war'
         assert expected in text, (expected, text)
 
+    @unittest.skip("Text now hidden in iFrame")
     def test_supplemental_text_atrocity_archives(self):
         # Atrocity Archives
         p = self.from_asin(ItemId='0441016685')
         text = '\n'.join(p.supplemental_text)
         expected = u'This dark, funny blend of SF and horror reads like James Bond'
         assert expected in text, (expected, text)
+
+    def test_503ing_product(self):
+        p = self.from_asin(ItemId='1490475575')
 
 if __name__ == '__main__':
     unittest.main()
