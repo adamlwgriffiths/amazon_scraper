@@ -16,7 +16,7 @@ class Reviews(object):
         else:
             if URL:
                 # cleanup the url
-                URL = reviews_url(extract_reviews_id(URL))                
+                URL = reviews_url(extract_reviews_id(URL))
         if not URL:
             raise ValueError('Invalid review page parameters')
 
@@ -65,8 +65,8 @@ class Reviews(object):
     @property
     def ids(self):
         return [
-            extract_review_id(anchor['href'])
-            for anchor in self.soup.find_all('a', text=re.compile(ur'permalink', flags=re.I))
+            anchor["id"]
+            for anchor in self.soup.find_all('div', class_="a-section review")
         ]
 
     @property
