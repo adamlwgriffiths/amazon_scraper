@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 import re
 import requests
+from urlparse import urljoin
+
 from bs4 import BeautifulSoup
+
 from amazon_scraper import review_url, reviews_url, extract_review_id, dict_acceptable, retry, rate_limit, extract_reviews_id, user_agent
 
 
@@ -57,9 +60,9 @@ class Reviews(object):
     @property
     def next_page_url(self):
         # lazy loading causes this to differ from the HTML visible in chrome
-        anchor = self.soup.find('a', text=re.compile(ur'next', flags=re.I))
+        anchor = self.soup.find('a', href=re.compile(r'next'))
         if anchor:
-            return unicode(anchor['href'])
+            return urljoin("http://www.amazon.com", unicode(anchor['href']))
         return None
 
     @property
