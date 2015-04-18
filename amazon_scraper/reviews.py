@@ -16,9 +16,7 @@ class Reviews(object):
                 raise ValueError('URL passed as ASIN')
 
             URL = reviews_url(ItemId)
-        elif URL and 'product-reviews' in URL:  # This is probably a valid product review page. Let it be.
-            URL = URL
-        elif URL:
+        elif URL and 'product-reviews' not in URL:  # If product-reviews in the url it's probably a valid product review page. Let it be.
             # cleanup the url
             URL = reviews_url(extract_reviews_id(URL))
         else:
