@@ -16,12 +16,13 @@ class Reviews(object):
                 raise ValueError('URL passed as ASIN')
 
             URL = reviews_url(ItemId)
+        elif URL and 'product-reviews' in URL:  # This is probably a valid product review page. Let it be.
+            URL = URL
+        elif URL:
+            # cleanup the url
+            URL = reviews_url(extract_reviews_id(URL))
         else:
-            if URL:
-                # cleanup the url
-                URL = reviews_url(extract_reviews_id(URL))
-        if not URL:
-            raise ValueError('Invalid review page parameters')
+            raise ValueError('Invalid review page parameters. Input a URL or a valid ASIN!')
 
         self.api = api
         self._URL = URL
@@ -55,7 +56,7 @@ class Reviews(object):
 
     @property
     def url(self):
-        return reviews_url(self.asin)
+        return self._URL
 
     @property
     def next_page_url(self):
