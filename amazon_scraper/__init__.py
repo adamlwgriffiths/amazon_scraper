@@ -13,6 +13,7 @@ import time
 import requests
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
+import dateutil.parser
 from bs4 import BeautifulSoup
 
 log = logging.getLogger(__name__)
@@ -74,6 +75,14 @@ def add_query(url, **kwargs):
     query_params.update(kwargs)
     query_string = urllib.urlencode(query_params, doseq=True)
     return urlparse.urlunsplit((scheme, netloc, path, query_string, fragment))
+
+
+def get_review_date(raw_date):
+    string = unicode(raw_date)
+    # 2011-11-07T05:50:41Z
+    date = dateutil.parser.parse(string)
+    return date
+
 
 def strip_html_tags(html):
     if html:
@@ -176,4 +185,3 @@ class AmazonScraper(object):
     def search_n(self, n, **kwargs):
         for p in self.api.search_n(n, **kwargs):
             yield Product(p)
-
