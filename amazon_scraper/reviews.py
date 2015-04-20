@@ -93,26 +93,32 @@ class SubReview(object):
 
     def to_dict(self):
         return {
-            k: getattr(self, k)
-            for k in dir(self)
-            if dict_acceptable(self, k, blacklist=['soup'])
+            "author": self.author,
+            "date": self.date,
+            "id": self.id,
+            "rating": self.rating,
+            "text": self.text,
+            "title": self.title,
+            "url": self.url,
         }
 
 
 class Reviews(object):
     def __init__(self, api, ItemId=None, URL=None):
+        self._asin = None
         if ItemId and not URL:
             # check for http://www.amazon.com
             if 'amazon' in ItemId:
                 raise ValueError('URL passed as ASIN')
 
             URL = reviews_url(ItemId)
-        elif URL and 'product-reviews' not in URL:  # If product-reviews in the url it's probably a valid product review page. Let it be.
+        elif not URL and not ItemId:
+            raise ValueError('Invalid review page parameters. Input a URL or a valid ASIN!')
+        elif URL and 'product-reviews' not in URL:  # If product-reviews is in the url it's probably a valid product review page. Let it be.
             # cleanup the url
             URL = reviews_url(extract_reviews_id(URL))
-        else:
-            raise ValueError('Invalid review page parameters. Input a URL or a valid ASIN!')
 
+        self._asin = re.search(r"\/product-reviews\/(\w+)\/", URL).groups()[0]
         self.all_reviews = []
         self.api = api
         self._URL = URL
@@ -149,8 +155,7 @@ class Reviews(object):
 
     @property
     def asin(self):
-        span = self.soup.find('span', class_='asinReviewsSummary', attrs={'name':True})
-        return unicode(span['name'])
+        return self._asin
 
     @property
     def url(self):

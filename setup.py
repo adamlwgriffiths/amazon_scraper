@@ -22,10 +22,10 @@ setup(
     url='https://github.com/adamlwgriffiths/amazon_scraper',
     test_suite='tests',
     packages=['amazon_scraper'],
-    requires=[
-        'pythonamazonsimpleproductapi',
+    install_requires=[
+        'python-amazon-simple-product-api',
         'xmltodict',
-        'pythondateutil',
+        'python-dateutil',
         'beautifulsoup4',
         'requests',
     ],

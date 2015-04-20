@@ -3,17 +3,28 @@ import unittest
 import os
 from tests import AmazonTestCase
 
-class SearchTestCase(AmazonTestCase):
+class ReviewsTestCase(AmazonTestCase):
+    def test_parse_reviews_on_page(self):
+        p = self.amzn.lookup(ItemId="B0051QVF7A")
+        revs = self.amzn.reviews(URL=p.reviews_url)
+        all_reviews = revs.parse_reviews_on_page()
+        assert len(all_reviews), 10
+
+        # Ensure all review ids are represented
+        revs_ids = set(revs.ids)
+        all_reviews_ids = set([dict_.to_dict()["id"] for dict_ in all_reviews])
+        assert revs_ids == all_reviews_ids
+
+        # Ensure everything is found properly we don't really care about values though
+        for dict_ in all_reviews:
+            assert None not in dict_.to_dict().values()
+
     def test_reviews(self):
         p = self.amzn.lookup(ItemId='B0051QVF7A')
-        rs = self.amzn.reviews(URL=p.reviews_url)
-        rs.to_dict()
-        assert len(list(rs.ids))
-        assert rs.asin in ['B0051QVF7A', 'B00492CIC8']
-
-        r = self.amzn.review(Id=rs.ids[0])
-        r.to_dict()
-        assert r.asin in ['B0051QVF7A', 'B00492CIC8'], r.asin
+        revs = self.amzn.reviews(URL=p.reviews_url)
+        revs.to_dict()
+        assert len(list(revs.ids))
+        assert revs.asin == 'B0051QVF7A', revs.asin
 
     def test_reviews_asin(self):
         rs = self.amzn.reviews(ItemId='B0051QVF7A')

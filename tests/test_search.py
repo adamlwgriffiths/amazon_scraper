@@ -28,11 +28,6 @@ class SearchTestCase(AmazonTestCase):
         for p in self.amzn.similarity_lookup(ItemId='B0051QVESA,B005DOK8NW'):
             self.verify_product(p)
 
-    @unittest.skip('There is no test here yet')
-    def test_browse_node_lookup(self):
-        # wtf is this for?
-        pass
-
 
 if __name__ == '__main__':
     unittest.main()
