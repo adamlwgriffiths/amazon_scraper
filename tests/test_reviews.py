@@ -5,7 +5,8 @@ from tests import AmazonTestCase
 
 class ReviewsTestCase(AmazonTestCase):
     def test_parse_reviews_on_page(self):
-        p = self.amzn.lookup(ItemId="B0051QVF7A")
+        asin = "B0051QVF7A"
+        p = self.amzn.lookup(ItemId=asin)
         revs = self.amzn.reviews(URL=p.reviews_url)
         all_reviews = revs.parse_reviews_on_page()
         assert len(all_reviews), 10
@@ -17,6 +18,7 @@ class ReviewsTestCase(AmazonTestCase):
 
         # Ensure everything is found properly we don't really care about values though
         for dict_ in all_reviews:
+            assert dict_.to_dict()["asin"] == asin
             assert None not in dict_.to_dict().values()
 
     def test_reviews(self):
