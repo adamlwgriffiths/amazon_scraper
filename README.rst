@@ -183,3 +183,4 @@ Authors
 =======
 
  * `Adam Griffiths <https://github.com/adamlwgriffiths>`_
+ * `Greg Rehm <https://github.com/hahnicity>`_
