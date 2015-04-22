@@ -1,6 +1,2 @@
-python-amazon-simple-product-api
-xmltodict
-python-dateutil
-beautifulsoup4
-requests
-html5lib
+-e git+https://github.com/yoavaviram/python-amazon-simple-product-api.git#egg=python-amazon-simple-product-api
+-e .

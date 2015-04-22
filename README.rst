@@ -49,9 +49,11 @@ Installation
     pip install amazon_scraper
 
 
-Example
-=======
+Examples
+========
 
+All Products All The Time
+~~~~~~~~~~~~~~~~~~~~~~~~~
 Create an API instance::
 
     >>> from amazon_scraper import AmazonScraper
@@ -134,6 +136,8 @@ Supplemental text not available via the API::
     [u"Bob Howard is a computer-hacker desk jockey ... ", u"Lovecraft\'s Cthulhu meets Len Deighton\'s spies ... ", u"This dark, funny blend of SF and ... "]
 
 
+Review API
+~~~~~~~~~~
 View lists of reviews::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')
@@ -145,7 +149,16 @@ View lists of reviews::
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
 
+Quickly get a list of all reviews on a review page using `parse_reviews_on_page`::
 
+    >>> p = amzn.lookup(ItemId='B0051QVF7A')
+    >>> rs = amzn.reviews(URL=p.reviews_url)
+    >>> all_reviews_on_page = rs.parse_reviews_on_page()
+    >>> len(all_reviews_on_page)
+    10
+    >>> all_reviews_on_page[0].to_dict()["title"]
+    'Fantastic device - pick your Kindle!'
+    
 By ASIN/ItemId::
 
     >>> rs = amzn.reviews(ItemId='B0051QVF7A')
@@ -155,7 +168,8 @@ By ASIN/ItemId::
     ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
 
 
-Individual reviews::
+For individual reviews use the `review` method. As a note this method is **NOT** suggested
+for use in bulk collection of reviews. Use `parse_reviews_on_page` instead.::
 
     >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id

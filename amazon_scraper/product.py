@@ -15,7 +15,9 @@ class Product(object):
         self._soup = None
 
     def __getattr__(self, name):
-        # allow direct access to the product object
+        """
+        Allow direct access to the product object
+        """
         return getattr(self.product, name)
 
     @property
@@ -249,6 +251,6 @@ class Product(object):
         d.update({
             k:getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k, blacklist=['soup', 'api'])
+            if dict_acceptable(self, k, blacklist=['soup', 'api', 'ratings'])
         })
         return d

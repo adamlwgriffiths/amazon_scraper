@@ -9,6 +9,7 @@ tests/config.json
 
 # python
 *.py[co]
+*.rope
 
 # Packages
 *.egg

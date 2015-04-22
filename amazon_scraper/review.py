@@ -1,8 +1,17 @@
 from __future__ import absolute_import
 import requests
-import dateutil.parser
 from bs4 import BeautifulSoup
-from amazon_scraper import review_url, extract_review_id, process_rating, strip_html_tags, dict_acceptable, retry, rate_limit, user_agent
+from amazon_scraper import (
+    review_url,
+    extract_review_id,
+    process_rating,
+    strip_html_tags,
+    dict_acceptable,
+    retry,
+    rate_limit,
+    user_agent,
+    get_review_date,
+)
 
 
 class Review(object):
@@ -69,10 +78,7 @@ class Review(object):
     @property
     def date(self):
         abbr = self.soup.find('abbr', class_='dtreviewed')
-        string = unicode(abbr['title'])
-        # 2011-11-07T05:50:41Z
-        date = dateutil.parser.parse(string)
-        return date
+        return get_review_date(abbr["title"])
 
     @property
     def author(self):
