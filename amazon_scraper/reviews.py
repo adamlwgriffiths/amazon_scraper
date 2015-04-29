@@ -35,6 +35,7 @@ class SubReview(object):
 
         self._asin = product_asin
         self._author = None
+        self._author_reviews_url = None
         self._date = None
         self._rating = None
         self._text = None
@@ -58,6 +59,20 @@ class SubReview(object):
     @property
     def author(self):
         return self._parse_generic_property(self._author, "a", "author")
+
+    @property
+    def author_reviews_url(self):
+        """
+        Get the page pointing to the author's reviews
+        """
+        if not self._author_reviews_url:
+            author_reviews_url = self.soup.find("a", class_=re.compile("author"))
+            if author_reviews_url:
+                tmp_url = urljoin("http://amazon.com", author_reviews_url.attrs["href"])
+                self._author_reviews_url = tmp_url.replace("pdp", "cdp").replace("profile", "member-reviews")
+            else:
+                self._author_reviews_url = author_reviews_url
+        return self._author_reviews_url
 
     @property
     def date(self):
@@ -100,6 +115,7 @@ class SubReview(object):
         return {
             "asin": self.asin,
             "author": self.author,
+            "author_reviews_url": self.author_reviews_url,
             "date": self.date,
             "id": self.id,
             "rating": self.rating,
@@ -131,12 +147,14 @@ class Reviews(object):
         self._soup = None
 
     def parse_reviews_on_page(self):
+        tmp = []
         for review_id in self.ids:
             try:
                 review = SubReview(self.soup, review_id, self.asin)
             except ValueError:
                 continue
-            self.all_reviews.append(review)
+            tmp.append(review)
+        self.all_reviews = tmp
         return self.all_reviews
 
     @property
