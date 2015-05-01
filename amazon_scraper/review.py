@@ -39,7 +39,6 @@ class Review(object):
             rate_limit(self.api)
             r = requests.get(self._URL, headers={'User-Agent':user_agent}, verify=False)
             r.raise_for_status()
-            #self._soup = BeautifulSoup(r.text, 'html.parser')
             self._soup = BeautifulSoup(r.text, 'html5lib')
         return self._soup
 

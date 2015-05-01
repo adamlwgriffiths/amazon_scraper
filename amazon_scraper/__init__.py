@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
-# load our version
-from .version import __version__
-
 import logging
 import re
 import urlparse
 import urllib
 import functools
 import time
+
 import requests
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 import dateutil.parser
 from bs4 import BeautifulSoup
+
+from .version import __version__  # load our version
+
 
 log = logging.getLogger(__name__)
 
@@ -145,9 +145,12 @@ def rate_limit(api):
                     time.sleep(wait_time)
         api._last_query_time[0] = time.time()
 
+#This schema of imports is non-standard and should change. It will require some re-ordering of
+#functions inside the package though.
 from amazon_scraper.product import Product
 from amazon_scraper.reviews import Reviews
 from amazon_scraper.review import Review
+from amazon_scraper.reviewer import Reviewer
 
 
 class AmazonScraper(object):
@@ -159,6 +162,9 @@ class AmazonScraper(object):
 
     def review(self, Id=None, URL=None):
         return Review(self, Id, URL)
+
+    def reviewer(self, url):
+        return Reviewer(url)
 
     def lookup(self, URL=None, **kwargs):
         if URL:
