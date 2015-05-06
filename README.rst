@@ -192,6 +192,27 @@ By URL::
     >>> r.id
     R3MF0NIRI3BT1E
 
+Reviewer API
+~~~~~~~~~~~~
+This package also supports getting information about specific reviewers and the reviews 
+they have written over time. It is advisable to first look up a reviewer via another one
+of the products they have reviewed though. This situation will be improved in the future 
+though.
+
+Get reviews that a single reviewer has created::
+
+
+    r = self.amzn.review(Id="R3MF0NIRI3BT1E")
+    reviewer = self.amzn.reviewer(r.author_reviews_url)
+    all_reviews = reviewer.parse_reviews_on_page()
+
+Iterate to the authors next review page if they have one::
+
+    r = self.amzn.review(Id="R3MF0NIRI3BT1E")
+    reviewer = self.amzn.reviewer(r.author_reviews_url)
+    reviewer = self.amzn.reviewer(reviewer.next_page_url)
+    second_page_reviews = reviewer.parse_reviews_on_page()
+
 
 Authors
 =======

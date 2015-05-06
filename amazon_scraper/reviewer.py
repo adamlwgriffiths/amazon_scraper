@@ -122,7 +122,7 @@ class Reviewer(object):
             raise ValueError(
                 "We cannot parse reviews that are not on a users' cdp/member-reviews page"
             )
-        self.all_reviews = None
+        self.all_reviews = []
         self._author = None
         self._next_page_url = None
         self._url = url
@@ -189,7 +189,9 @@ class Reviewer(object):
         The product information is parsed for its asin, and then the review part is found
         and then sent to the `ReviewerListedReview` object for further parsing.
         """
-        tmp = []
+        if self.all_reviews:
+            return self.all_reviews
+
         # First get all review ids on the page
         ids = self.soup.find_all("a", attrs={"name": re.compile(r"[A-Z0-9]{13}")})
         for id_ in ids:
@@ -202,6 +204,5 @@ class Reviewer(object):
             asin_tag = full_review_soup.find("a", attrs={"href": asin_regex})
             asin = asin_regex.search(asin_tag.attrs["href"]).groups()[0]
             # Now get the review
-            tmp.append(ReviewerListedReview(review_soup, asin, self.author, id_str, self.url))
-        self.all_reviews = tmp
+            self.all_reviews.append(ReviewerListedReview(review_soup, asin, self.author, id_str, self.url))
         return self.all_reviews

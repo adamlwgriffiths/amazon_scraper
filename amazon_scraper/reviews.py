@@ -147,14 +147,15 @@ class Reviews(object):
         self._soup = None
 
     def parse_reviews_on_page(self):
-        tmp = []
+        if self.all_reviews:
+            return self.all_reviews
+
         for review_id in self.ids:
             try:
                 review = SubReview(self.soup, review_id, self.asin)
             except ValueError:
                 continue
-            tmp.append(review)
-        self.all_reviews = tmp
+            self.all_reviews.append(review)
         return self.all_reviews
 
     @property
