@@ -4,11 +4,11 @@ import os
 from tests import AmazonTestCase
 
 class ReviewsTestCase(AmazonTestCase):
-    def test_parse_reviews_on_page(self):
+    def test_all_reviews(self):
         asin = "B0051QVF7A"
         p = self.amzn.lookup(ItemId=asin)
         revs = self.amzn.reviews(URL=p.reviews_url)
-        all_reviews = revs.parse_reviews_on_page()
+        all_reviews = revs.all_reviews
         assert len(all_reviews), 10
 
         # Ensure all review ids are represented

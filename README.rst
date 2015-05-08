@@ -149,11 +149,11 @@ View lists of reviews::
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
 
-Quickly get a list of all reviews on a review page using `parse_reviews_on_page`::
+Quickly get a list of all reviews on a review page using the `all_reviews` property::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')
     >>> rs = amzn.reviews(URL=p.reviews_url)
-    >>> all_reviews_on_page = rs.parse_reviews_on_page()
+    >>> all_reviews_on_page = rs.all_reviews
     >>> len(all_reviews_on_page)
     10
     >>> all_reviews_on_page[0].to_dict()["title"]
@@ -169,7 +169,7 @@ By ASIN/ItemId::
 
 
 For individual reviews use the `review` method. As a note this method is **NOT** suggested
-for use in bulk collection of reviews. Use `parse_reviews_on_page` instead.::
+for use in bulk collection of reviews. Use `all_reviews` instead.::
 
     >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id
@@ -204,14 +204,14 @@ Get reviews that a single reviewer has created::
 
     r = self.amzn.review(Id="R3MF0NIRI3BT1E")
     reviewer = self.amzn.reviewer(r.author_reviews_url)
-    all_reviews = reviewer.parse_reviews_on_page()
+    all_reviews = reviewer.all_reviews
 
 Iterate to the authors next review page if they have one::
 
     r = self.amzn.review(Id="R3MF0NIRI3BT1E")
     reviewer = self.amzn.reviewer(r.author_reviews_url)
     reviewer = self.amzn.reviewer(reviewer.next_page_url)
-    second_page_reviews = reviewer.parse_reviews_on_page()
+    second_page_reviews = reviewer.all_reviews
 
 
 Authors

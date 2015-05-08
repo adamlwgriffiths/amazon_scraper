@@ -141,22 +141,23 @@ class Reviews(object):
             URL = reviews_url(extract_reviews_id(URL))
 
         self._asin = re.search(r"\/product-reviews\/(\w+)\/", URL).groups()[0]
-        self.all_reviews = []
+        self._all_reviews = []
         self.api = api
         self._URL = URL
         self._soup = None
 
-    def parse_reviews_on_page(self):
-        if self.all_reviews:
-            return self.all_reviews
+    @property
+    def all_reviews(self):
+        if self._all_reviews:
+            return self._all_reviews
 
         for review_id in self.ids:
             try:
                 review = SubReview(self.soup, review_id, self.asin)
             except ValueError:
                 continue
-            self.all_reviews.append(review)
-        return self.all_reviews
+            self._all_reviews.append(review)
+        return self._all_reviews
 
     @property
     @retry()

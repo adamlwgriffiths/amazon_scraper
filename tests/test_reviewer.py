@@ -4,11 +4,11 @@ from tests import AmazonTestCase
 
 
 class ReviewerTestCase(AmazonTestCase):
-    def test_parse_reviews_on_page(self):
+    def test_all_reviews(self):
         r = self.amzn.review(Id="R3MF0NIRI3BT1E")
         assert "author_reviews_url" in r.to_dict()
         reviewer = self.amzn.reviewer(r.to_dict()["author_reviews_url"])
-        all_reviews = reviewer.parse_reviews_on_page()
+        all_reviews = reviewer.all_reviews
         keys = ["asin", "author", "author_reviews_url", "date", "id", "rating", "text", "title", "url"]
         for review in all_reviews:
             review_dict = review.to_dict()

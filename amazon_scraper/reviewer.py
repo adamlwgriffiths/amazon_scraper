@@ -112,20 +112,20 @@ class Reviewer(object):
 
     :param url: A url pointing to the reviewer's cdp/member-reviews list
     """
-    def __init__(self, url):
-        if not (isinstance(url, str) or isinstance(url, unicode)):
+    def __init__(self, URL):
+        if not (isinstance(URL, str) or isinstance(URL, unicode)):
             raise ValueError(
                 "Our url {} cannot be of type {}. It must be a string".
-                format(url, type(url))
+                format(URL, type(URL))
             )
-        if "cdp/member-reviews" not in url:
+        if "cdp/member-reviews" not in URL:
             raise ValueError(
                 "We cannot parse reviews that are not on a users' cdp/member-reviews page"
             )
-        self.all_reviews = []
+        self._all_reviews = []
         self._author = None
         self._next_page_url = None
-        self._url = url
+        self._url = URL
         self._soup = None
 
     @property
@@ -177,7 +177,8 @@ class Reviewer(object):
     def url(self):
         return self._url
 
-    def parse_reviews_on_page(self):
+    @property
+    def all_reviews(self):
         """
         Parse all reviews created by the reviewer on the specific page.
 
@@ -189,8 +190,8 @@ class Reviewer(object):
         The product information is parsed for its asin, and then the review part is found
         and then sent to the `ReviewerListedReview` object for further parsing.
         """
-        if self.all_reviews:
-            return self.all_reviews
+        if self._all_reviews:
+            return self._all_reviews
 
         # First get all review ids on the page
         ids = self.soup.find_all("a", attrs={"name": re.compile(r"[A-Z0-9]{13}")})
@@ -204,5 +205,5 @@ class Reviewer(object):
             asin_tag = full_review_soup.find("a", attrs={"href": asin_regex})
             asin = asin_regex.search(asin_tag.attrs["href"]).groups()[0]
             # Now get the review
-            self.all_reviews.append(ReviewerListedReview(review_soup, asin, self.author, id_str, self.url))
-        return self.all_reviews
+            self._all_reviews.append(ReviewerListedReview(review_soup, asin, self.author, id_str, self.url))
+        return self._all_reviews
