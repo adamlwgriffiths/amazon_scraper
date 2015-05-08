@@ -1,6 +1,9 @@
 from __future__ import absolute_import
+from urlparse import urljoin
+
 import requests
 from bs4 import BeautifulSoup
+
 from amazon_scraper import (
     review_url,
     extract_review_id,
@@ -36,7 +39,6 @@ class Review(object):
             rate_limit(self.api)
             r = requests.get(self._URL, headers={'User-Agent':user_agent}, verify=False)
             r.raise_for_status()
-            #self._soup = BeautifulSoup(r.text, 'html.parser')
             self._soup = BeautifulSoup(r.text, 'html5lib')
         return self._soup
 
@@ -82,9 +84,6 @@ class Review(object):
 
     @property
     def author(self):
-        # http://www.amazon.com/review/R3MF0NIRI3BT1E
-        # http://www.amazon.com/review/RI3ARYEHW5DT5
-        # http://www.amazon.com/review/R2OD03CRAU7EDV
         vcard = self.soup.find('span', class_='reviewer vcard')
         if vcard:
             tag = vcard.find(class_='fn')
@@ -92,6 +91,16 @@ class Review(object):
                 author = unicode(tag.string)
                 return author
         return None
+
+    @property
+    def author_reviews_url(self):
+        try:
+            vcard = self.soup.find('span', class_='reviewer vcard')
+            path = vcard.find("a").attrs["href"]
+        except (AttributeError, KeyError):
+            return None
+        else:
+            return urljoin("http://amazon.com", path.replace("pdp", "cdp").replace("profile", "member-reviews"))
 
     @property
     def text(self):
