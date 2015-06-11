@@ -144,10 +144,18 @@ View lists of reviews::
     >>> rs = amzn.reviews(URL=p.reviews_url)
     >>> rs.asin
     B0051QVF7A
+    >>> # print the reviews on this first page
     >>> rs.ids
     ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
+    >>> # by iterating over the reviews object we get access to reviews on ALL pages
+    >>> for r in rs:
+    >>>     print(r.id)
+    'R3MF0NIRI3BT1E'
+    'R3N2XPJT4I1XTI'
+    'RWG7OQ5NMGUMW'
+    ...
 
 Quickly get a list of all reviews on a review page using the `all_reviews` property::
 
