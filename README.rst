@@ -9,7 +9,7 @@ Uses the `Amazon Simple Product API <https://pypi.python.org/pypi/python-amazon-
 to provide API accessible data. API search functions are imported directly into
 the amazon_scraper module.
 
-Parameters are kept the same are in the same style as the underlying API, which in
+Parameters are in the same style as the Amazon Simple Product API, which in
 turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (ItemId).
 
 
@@ -47,6 +47,15 @@ Installation
 ::
 
     pip install amazon_scraper
+
+
+Dependencies
+============
+
+    * `Amazon Simple Product API <https://pypi.python.org/pypi/python-amazon-simple-product-api/>`_
+    * `Requests <http://docs.python-requests.org/en/latest/>`_
+    * `BeautifulSoup 4 <http://www.crummy.com/software/BeautifulSoup/>`_
+    * `xmltodict <https://github.com/martinblech/xmltodict>`_
 
 
 Examples
