@@ -52,10 +52,11 @@ Installation
 Dependencies
 ============
 
-* `Amazon Simple Product API <https://pypi.python.org/pypi/python-amazon-simple-product-api/>`_
-* `Requests <http://docs.python-requests.org/en/latest/>`_
-* `BeautifulSoup 4 <http://www.crummy.com/software/BeautifulSoup/>`_
+* `python-amazon-simple-product-api <https://pypi.python.org/pypi/python-amazon-simple-product-api/>`_
+* `requests <http://docs.python-requests.org/en/latest/>`_
+* `beautifulsoup4 <http://www.crummy.com/software/BeautifulSoup/>`_
 * `xmltodict <https://github.com/martinblech/xmltodict>`_
+* `python-dateutil <https://dateutil.readthedocs.org/en/latest/>`_
 
 
 Examples
