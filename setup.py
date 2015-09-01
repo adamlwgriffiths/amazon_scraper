@@ -18,7 +18,6 @@ setup(
     long_description=long_description,
     license = 'BSD',
     author="Adam Griffiths",
-    author_email="adam.lw.griffiths@gmail.com",
     url='https://github.com/adamlwgriffiths/amazon_scraper',
     test_suite='tests',
     packages=['amazon_scraper'],
