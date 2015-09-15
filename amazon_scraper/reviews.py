@@ -177,7 +177,7 @@ class Reviews(object):
         while page:
             for id in page.ids:
                 yield id
-            page = Reviews(URL=page.next_page_url) if page.next_page_url else None
+            page = Reviews(self.api, URL=page.next_page_url) if page.next_page_url else None
 
     @property
     def asin(self):
