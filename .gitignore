@@ -1,5 +1,6 @@
 # ignore any AWS settings
 tests/config.json
+tests/cassettes/*
 
 # ignore compressed files
 # unzip them and commit those instead
