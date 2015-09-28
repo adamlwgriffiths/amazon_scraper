@@ -67,6 +67,13 @@ class ReviewsTestCase(AmazonTestCase):
         r = self.amzn.reviews(URL=url)
         assert r.asin == 'B00008MOQA', r.asin
 
+    def test_iteration(self):
+        p = self.amzn.lookup(ItemId='B0051QVF7A')
+        rs = self.amzn.reviews(URL=p.reviews_url)
+
+        for r in rs:
+            assert r
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -163,8 +163,24 @@ class ProductTestCase(AmazonTestCase):
         expected = u'This dark, funny blend of SF and horror reads like James Bond'
         assert expected in text, (expected, text)
 
-    def test_503ing_product(self):
-        p = self.from_asin(ItemId='1490475575')
+    #def test_503ing_product(self):
+    #    p = self.from_asin(ItemId='1490475575')
+
+    def test_iteration_14(self):
+        # test #14
+        p = self.amzn.lookup(ItemId='B00BGO0Q9O')
+        assert p.title
+        assert p.ratings
+
+        rs = self.amzn.reviews(URL=p.reviews_url)
+        for r in rs:
+            assert r.title
+
+    def test_iteration_15(self):
+        # test #15
+        for p in self.amzn.search(Keywords='python', SearchIndex='Books'):
+            assert p.title
+
 
 if __name__ == '__main__':
     unittest.main()
