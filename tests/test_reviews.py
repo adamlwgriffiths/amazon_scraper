@@ -41,7 +41,7 @@ class ReviewsTestCase(AmazonTestCase):
     def test_review_id(self):
         r = self.amzn.review(Id='R3MF0NIRI3BT1E')
         assert r.author == u'FreeSpirit', r.author
-        assert r.asin == 'B00492CIC8', rs.asin
+        assert r.asin == 'B00492CIC8', r.asin
         r.to_dict()
 
     def test_review_url(self):
