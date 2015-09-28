@@ -2,10 +2,8 @@ from __future__ import absolute_import
 import re
 from urlparse import urljoin
 import warnings
-
 import requests
 from bs4 import BeautifulSoup
-
 from amazon_scraper import (
     review_url,
     reviews_url,
@@ -163,7 +161,7 @@ class Reviews(object):
     @retry()
     def soup(self):
         if not self._soup:
-            r = requests.get(self._URL, headers={'User-Agent':user_agent}, verify=False)
+            r = requests.get(self._URL, headers={'User-Agent': user_agent}, verify=False)
             r.raise_for_status()
             # fix #1
             # 'html.parser' has trouble with http://www.amazon.com/product-reviews/B00008MOQA/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending

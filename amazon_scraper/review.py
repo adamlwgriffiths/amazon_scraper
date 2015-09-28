@@ -1,9 +1,7 @@
 from __future__ import absolute_import
 from urlparse import urljoin
-
 import requests
 from bs4 import BeautifulSoup
-
 from amazon_scraper import (
     review_url,
     extract_review_id,
@@ -37,14 +35,14 @@ class Review(object):
     def soup(self):
         if not self._soup:
             rate_limit(self.api)
-            r = requests.get(self._URL, headers={'User-Agent':user_agent}, verify=False)
+            r = requests.get(self._URL, headers={'User-Agent': user_agent}, verify=False)
             r.raise_for_status()
             self._soup = BeautifulSoup(r.text, 'html5lib')
         return self._soup
 
     @property
     def id(self):
-        anchor = self.soup.find('a', attrs={'name':True}, text=False)
+        anchor = self.soup.find('a', attrs={'name': True}, text=False)
         id = unicode(anchor['name'])
         return id
 
@@ -109,7 +107,7 @@ class Review(object):
 
     def to_dict(self):
         d = {
-            k:getattr(self, k)
+            k: getattr(self, k)
             for k in dir(self)
             if dict_acceptable(self, k, blacklist=['soup', '_URL', '_soup'])
         }

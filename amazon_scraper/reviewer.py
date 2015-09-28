@@ -196,7 +196,7 @@ class Reviewer(object):
         # First get all review ids on the page
         ids = self.soup.find_all("a", attrs={"name": re.compile(r"[A-Z0-9]{13}")})
         for id_ in ids:
-            id_str  = id_.attrs["name"]
+            id_str = id_.attrs["name"]
             review_soup = id_.findParent()
             asin_regex = re.compile(r"dp\/([A-Z0-9]{10})")
             # Get the soup of the full review (Item photo and description included) and get the

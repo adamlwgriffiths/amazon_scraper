@@ -6,7 +6,17 @@ import re
 import xmltodict
 import requests
 from bs4 import BeautifulSoup
-from amazon_scraper import product_url, extract_asin, reviews_url, strip_html_tags, dict_acceptable, retry, rate_limit, extract_reviews_id, user_agent
+from amazon_scraper import (
+    product_url,
+    extract_asin,
+    reviews_url,
+    strip_html_tags,
+    dict_acceptable,
+    retry,
+    rate_limit,
+    extract_reviews_id,
+    user_agent,
+)
 
 
 class Product(object):
@@ -29,7 +39,7 @@ class Product(object):
             url = product_url(self.asin)
             rate_limit(self.api)
             # verify=False ignores SSL errors
-            r = requests.get(url, headers={'User-Agent':user_agent}, verify=False)
+            r = requests.get(url, headers={'User-Agent': user_agent}, verify=False)
             r.raise_for_status()
             #self._soup = BeautifulSoup(r.text, 'html.parser')
             self._soup = BeautifulSoup(r.text, 'html5lib')
@@ -105,7 +115,7 @@ class Product(object):
     def author_page_url(self):
         tag = self.soup.find('div', class_='author_page_link')
         if tag:
-            a = tag.find('a', href=re.compile(r'/e/',flags=re.I))
+            a = tag.find('a', href=re.compile(r'/e/', flags=re.I))
             if a:
                 link = unicode(a['href'])
                 link = urlparse.urljoin('http://www.amazon.com', link)
@@ -136,7 +146,7 @@ class Product(object):
 
         table = self.soup.find('table', id='histogramTable')
         if table:
-            for rating, row in zip([4,3,2,1,0], table.find_all('tr', class_='a-histogram-row')):
+            for rating, row in zip([4, 3, 2, 1, 0], table.find_all('tr', class_='a-histogram-row')):
                 # get the third td tag
                 children = [child for child in row.find_all('td', recursive=False)]
                 td = children[2]
@@ -219,7 +229,7 @@ class Product(object):
                 result.append(text)
 
         # http://www.amazon.com/dp/B0006FUAD6
-        tag = self.soup.find('div', id=re.compile('feature-bullets',flags=re.I))
+        tag = self.soup.find('div', id=re.compile('feature-bullets', flags=re.I))
         if tag:
             tags = map(unicode, tag.find_all('span'))
             text = strip_html_tags(u''.join(tags))
@@ -238,18 +248,18 @@ class Product(object):
         d = json.loads(json.dumps(d))
 
         # filter our the top level crap which includes AWS keys etc
-        d = {'Item':d['Item']}
+        d = {'Item': d['Item']}
 
         # add the python properties
         d.update({
-            k:getattr(self.product, k)
+            k: getattr(self.product, k)
             for k in dir(self.product)
             if dict_acceptable(self.product, k, blacklist=['browse_nodes', 'api'])
         })
 
         # add our own properties
         d.update({
-            k:getattr(self, k)
+            k: getattr(self, k)
             for k in dir(self)
             if dict_acceptable(self, k, blacklist=['soup', 'api', 'ratings'])
         })

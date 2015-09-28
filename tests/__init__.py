@@ -39,7 +39,7 @@ class AmazonTestCase(unittest.TestCase):
     def setUpClass(cls):
         try:
             filename = os.path.join(os.path.dirname(__file__), 'config.json')
-            with open(filename,'r') as f:
+            with open(filename, 'r') as f:
                 config = json.load(f)
             assert config['access_key']
             assert config['secret_key']
@@ -78,7 +78,6 @@ class AmazonTestCase(unittest.TestCase):
         p = self.amzn.lookup(ItemId=ItemId)
         self.verify_product(p)
         return p
-
 
 
 if __name__ == '__main__':
