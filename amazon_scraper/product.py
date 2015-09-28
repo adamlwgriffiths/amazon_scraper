@@ -16,6 +16,7 @@ from amazon_scraper import (
     rate_limit,
     extract_reviews_id,
     user_agent,
+    html_parser,
 )
 
 
@@ -41,8 +42,7 @@ class Product(object):
             # verify=False ignores SSL errors
             r = requests.get(url, headers={'User-Agent': user_agent}, verify=False)
             r.raise_for_status()
-            #self._soup = BeautifulSoup(r.text, 'html.parser')
-            self._soup = BeautifulSoup(r.text, 'html5lib')
+            self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
 
     @property

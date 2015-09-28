@@ -1,15 +1,14 @@
 from __future__ import absolute_import
 import re
 from urlparse import urljoin
-
 from bs4 import BeautifulSoup
 import requests
-
 from amazon_scraper import (
     get_review_date,
     retry,
     review_url,
     user_agent,
+    html_parser,
 )
 
 RATINGS_MAPPING = {
@@ -134,7 +133,7 @@ class Reviewer(object):
         if not self._soup:
             r = requests.get(self.url, headers={"User-Agent": user_agent})
             r.raise_for_status()
-            self._soup = BeautifulSoup(r.text, "html5lib")
+            self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
 
     @property

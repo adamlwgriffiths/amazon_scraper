@@ -6,17 +6,21 @@ import urlparse
 import urllib
 import functools
 import time
-
 import requests
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 import dateutil.parser
 from bs4 import BeautifulSoup
-
 from .version import __version__  # load our version
 
 
 log = logging.getLogger(__name__)
+
+# fix #1
+# 'html.parser' has trouble with http://www.amazon.com/product-reviews/B00008MOQA/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
+# it sometimes doesn't find the asin span
+html_parser = 'html.parser'
+#html_parser = 'html5lib'
 
 #user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36'
@@ -86,7 +90,7 @@ def get_review_date(raw_date):
 
 def strip_html_tags(html):
     if html:
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, html_parser)
         text = soup.findAll(text=True)
         text = u'\n'.join(text).strip()
         return text

@@ -12,6 +12,7 @@ from amazon_scraper import (
     rate_limit,
     user_agent,
     get_review_date,
+    html_parser,
 )
 
 
@@ -37,7 +38,7 @@ class Review(object):
             rate_limit(self.api)
             r = requests.get(self._URL, headers={'User-Agent': user_agent}, verify=False)
             r.raise_for_status()
-            self._soup = BeautifulSoup(r.text, 'html5lib')
+            self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
 
     @property

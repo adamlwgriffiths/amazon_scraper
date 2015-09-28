@@ -14,6 +14,7 @@ from amazon_scraper import (
     extract_reviews_id,
     user_agent,
     get_review_date,
+    html_parser,
 )
 
 
@@ -163,11 +164,7 @@ class Reviews(object):
         if not self._soup:
             r = requests.get(self._URL, headers={'User-Agent': user_agent}, verify=False)
             r.raise_for_status()
-            # fix #1
-            # 'html.parser' has trouble with http://www.amazon.com/product-reviews/B00008MOQA/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
-            # it sometimes doesn't find the asin span
-            #self._soup = BeautifulSoup(r.text, 'html.parser')
-            self._soup = BeautifulSoup(r.text, 'html5lib')
+            self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
 
     def __iter__(self):
