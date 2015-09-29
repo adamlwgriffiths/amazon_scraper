@@ -172,9 +172,9 @@ class Reviews(object):
     def __iter__(self):
         page = self
         while page:
-            for id in page.ids:
-                yield id
-            page = Reviews(self.api, URL=page.next_page_url) if page.next_page_url else None
+            for review_id in page.ids:
+                yield SubReview(page.api, page.soup, review_id, page.asin)
+            page = Reviews(page.api, URL=page.next_page_url) if page.next_page_url else None
 
     @property
     def asin(self):
