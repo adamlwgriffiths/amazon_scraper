@@ -196,7 +196,7 @@ class Reviews(object):
     def ids(self):
         return [
             anchor["id"]
-            for anchor in self.soup.find_all('div', class_="a-section review")
+            for anchor in self.soup.find_all('div', class_="review")
         ]
 
     @property
