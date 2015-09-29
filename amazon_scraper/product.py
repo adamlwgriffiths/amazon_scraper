@@ -17,6 +17,7 @@ from amazon_scraper import (
     extract_reviews_id,
     user_agent,
     html_parser,
+    amazon_base,
 )
 
 
@@ -118,7 +119,7 @@ class Product(object):
             a = tag.find('a', href=re.compile(r'/e/', flags=re.I))
             if a:
                 link = unicode(a['href'])
-                link = urlparse.urljoin('http://www.amazon.com', link)
+                link = urlparse.urljoin(amazon_base, link)
                 return link
         return None
 

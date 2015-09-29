@@ -26,6 +26,8 @@ html_parser = 'html.parser'
 #user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36'
 
+amazon_base = 'http://www.amazon.com'
+
 _extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
 def extract_asin(url):
     try:
@@ -36,19 +38,19 @@ def extract_asin(url):
         raise
 
 def product_url(asin):
-    url = 'http://www.amazon.com/dp/{asin}'
-    return url.format(asin=asin)
+    url = '{base}/dp/{asin}'
+    return url.format(base=amazon_base, asin=asin)
 
 def add_affiliate(url, affiliate):
     return add_query(url, tag=affiliate)
 
 def reviews_url(asin):
-    url = 'http://www.amazon.com/product-reviews/{asin}/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending'
-    return url.format(asin=asin)
+    url = '{base}/product-reviews/{asin}/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending'
+    return url.format(base=amazon_base, asin=asin)
 
 def review_url(id):
-    url = 'http://www.amazon.com/review/{id}'
-    return url.format(id=id)
+    url = '{base}/review/{id}'
+    return url.format(base=amazon_base, id=id)
 
 _process_rating_regexp = re.compile(r'([\d\.]+) out of [\d\.]+ stars', flags=re.I)
 def process_rating(text):

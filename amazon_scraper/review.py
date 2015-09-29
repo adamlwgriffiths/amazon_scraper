@@ -13,6 +13,7 @@ from amazon_scraper import (
     user_agent,
     get_review_date,
     html_parser,
+    amazon_base,
 )
 
 
@@ -99,7 +100,7 @@ class Review(object):
         except (AttributeError, KeyError):
             return None
         else:
-            return urljoin("http://amazon.com", path.replace("pdp", "cdp").replace("profile", "member-reviews"))
+            return urljoin(amazon_base, path.replace("pdp", "cdp").replace("profile", "member-reviews"))
 
     @property
     def text(self):

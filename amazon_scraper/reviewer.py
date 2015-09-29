@@ -9,6 +9,7 @@ from amazon_scraper import (
     review_url,
     user_agent,
     html_parser,
+    amazon_base,
 )
 
 RATINGS_MAPPING = {
@@ -151,7 +152,7 @@ class Reviewer(object):
             if not tag:
                 self._next_page_url = None
             else:
-                self._next_page_url = urljoin("http://amazon.com", tag.attrs["href"])
+                self._next_page_url = urljoin(amazon_base, tag.attrs["href"])
 
         if not self._next_page_url:
             generic_page_regex = re.compile(r"page=(\d{1,})")

@@ -69,7 +69,7 @@ class SubReview(object):
         if not self._author_reviews_url:
             author_reviews_url = self.soup.find("a", class_=re.compile("author"))
             if author_reviews_url:
-                tmp_url = urljoin("http://amazon.com", author_reviews_url.attrs["href"])
+                tmp_url = urljoin(amazon_base, author_reviews_url.attrs["href"])
                 self._author_reviews_url = tmp_url.replace("pdp", "cdp").replace("profile", "member-reviews")
             else:
                 self._author_reviews_url = author_reviews_url
@@ -192,7 +192,7 @@ class Reviews(object):
         # lazy loading causes this to differ from the HTML visible in chrome
         anchor = self.soup.find('a', href=re.compile(r'product-reviews.*next', flags=re.I))
         if anchor:
-            return urljoin("http://www.amazon.com", unicode(anchor['href']))
+            return urljoin(amazon_base, unicode(anchor['href']))
         return None
 
     @property
