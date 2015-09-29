@@ -13,7 +13,7 @@ Parameters are in the same style as the Amazon Simple Product API, which in
 turn uses Bottlenose style parameters. Hence the non-Pythonic parameter names (ItemId).
 
 
-The AmazonScraper constructor will pass 'kwargs' to `Bottlenose <https://github.com/lionheart/bottlenose>`_ (via Amazon Simple Product API).
+The AmazonScraper constructor will pass 'args' and 'kwargs' to `Bottlenose <https://github.com/lionheart/bottlenose>`_ (via Amazon Simple Product API).
 Bottlenose supports AWS regions, queries per second limiting, query caching and other nice features. Please view Bottlenose' API for more information on this.
 
 The latest version of python-amazon-simple-product-api (1.5.0 at time of writing), doesn't support these arguemnts, only Region.
@@ -78,9 +78,10 @@ The creation function accepts 'kwargs' which are passed to 'bottlenose.Amazon' c
 
 Search::
 
+    >>> from __future__ import print_function
     >>> import itertools
     >>> for p in itertools.islice(amzn.search(Keywords='python', SearchIndex='Books'), 5):
-    >>>     print p.title
+    >>>     print(p.title)
     Learning Python, 5th Edition
     Python Programming: An Introduction to Computer Science 2nd Edition
     Python In A Day: Learn The Basics, Learn It Quick, Start Coding Fast (In A Day Books) (Volume 1)
@@ -100,7 +101,7 @@ Lookup by ASIN/ItemId::
 Batch Lookups::
 
     >>> for p in amzn.lookup(ItemId='B0051QVF7A,B007HCCNJU,B00BTI6HBS'):
-    >>>     print p.title
+    >>>     print(p.title)
     Kindle, Wi-Fi, 6" E Ink Display - for international shipment
     Kindle, 6" E Ink Display, Wi-Fi - Includes Special Offers (Black)
     Kindle Paperwhite 3G, 6" High Resolution Display with Next-Gen Built-in Light, Free 3G + Wi-Fi - Includes Special Offers
@@ -129,7 +130,7 @@ Alternative Bindings::
     ['B00IVM5X7E', '9163192993', '0899669433', 'B00IPXPQ9O', '1482998742', '0441444814', '1497344824']
     >>> for asin in p.alternatives:
     >>>     alt = amzn.lookup(ItemId=asin)
-    >>>     print alt.title, alt.binding
+    >>>     print(alt.title, alt.binding)
     The King in Yellow Kindle Edition
     The King in Yellow Unknown Binding
     King in Yellow Hardcover
@@ -167,7 +168,9 @@ View lists of reviews::
     'RWG7OQ5NMGUMW'
     ...
 
-Quickly get a list of all reviews on a review page using the `all_reviews` property::
+Quickly get a list of all reviews on a review page using the `all_reviews` property.
+This uses the brief reviews provided on the product page to avoid downloading each review separately. As such, some information
+may not be accessible::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')
     >>> rs = amzn.reviews(URL=p.reviews_url)
@@ -176,7 +179,9 @@ Quickly get a list of all reviews on a review page using the `all_reviews` prope
     10
     >>> all_reviews_on_page[0].to_dict()["title"]
     'Fantastic device - pick your Kindle!'
-    
+    >>> all_reviews_on_page[0].full_review().title
+    'Fantastic device - pick your Kindle!'
+
 By ASIN/ItemId::
 
     >>> rs = amzn.reviews(ItemId='B0051QVF7A')
@@ -186,8 +191,7 @@ By ASIN/ItemId::
     ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
 
 
-For individual reviews use the `review` method. As a note this method is **NOT** suggested
-for use in bulk collection of reviews. Use `all_reviews` instead.::
+For individual reviews use the `review` method::
 
     >>> r = amzn.review(Id=rs.ids[0])
     >>> r.id
@@ -209,6 +213,7 @@ By URL::
     >>> r = amzn.review(URL='http://www.amazon.com/review/R3MF0NIRI3BT1E')
     >>> r.id
     R3MF0NIRI3BT1E
+
 
 Reviewer API
 ~~~~~~~~~~~~
