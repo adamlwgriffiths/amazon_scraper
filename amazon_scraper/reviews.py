@@ -16,6 +16,7 @@ from amazon_scraper import (
     user_agent,
     get_review_date,
     html_parser,
+    amazon_base,
 )
 
 
