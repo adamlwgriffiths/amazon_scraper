@@ -211,7 +211,7 @@ class Reviews(object):
 
     def to_dict(self):
         d = {
-            k:getattr(self, k)
+            k: getattr(self, k)
             for k in dir(self)
             if dict_acceptable(self, k, blacklist=['soup', '_URL', '_soup'])
         }
