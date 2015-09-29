@@ -7,6 +7,7 @@ import urllib
 import functools
 import time
 import requests
+import warnings
 from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 import dateutil.parser
@@ -27,8 +28,12 @@ user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 
 
 _extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
 def extract_asin(url):
-    match = _extract_asin_regexp.search(url)
-    return str(match.group('asin'))
+    try:
+        match = _extract_asin_regexp.search(url)
+        return str(match.group('asin'))
+    except:
+        warnings.warn('Error matching ASIN in URL {}'.format(url))
+        raise
 
 def product_url(asin):
     url = 'http://www.amazon.com/dp/{asin}'
@@ -49,26 +54,42 @@ _process_rating_regexp = re.compile(r'([\d\.]+) out of [\d\.]+ stars', flags=re.
 def process_rating(text):
     """The rating normalised to 1.0
     """
-    rating_match = _process_rating_regexp.search(text)
-    return float(rating_match.group(1)) / 5.0
+    try:
+        rating_match = _process_rating_regexp.search(text)
+        return float(rating_match.group(1)) / 5.0
+    except:
+        warnings.warn('Error processing rating for text "{}"'.format(text))
+        raise
 
 _extract_reviews_id_regexp = re.compile(r'/product-reviews/(?P<id>[^/]+)', flags=re.I)
 def extract_reviews_id(url):
-    match = _extract_reviews_id_regexp.search(url)
-    return str(match.group('id'))
+    try:
+        match = _extract_reviews_id_regexp.search(url)
+        return str(match.group('id'))
+    except:
+        warnings.warn('Error matching reviews ID in URL {}'.format(url))
+        raise
 
 _extract_review_id_regexp = re.compile(r'/review/(?P<id>[^/]+)', flags=re.I)
 def extract_review_id(url):
-    match = _extract_review_id_regexp.search(url)
-    return str(match.group('id'))
+    try:
+        match = _extract_review_id_regexp.search(url)
+        return str(match.group('id'))
+    except:
+        warnings.warn('Error matching review ID in URL {}'.format(url))
+        raise
 
 _price_regexp = re.compile(ur'(?P<price>[$£][\d,\.]+)', flags=re.I)
 def extract_price(text):
-    match = _price_regexp.search(text)
-    price = match.group('price')
-    price = re.sub(ur'[$£,]', u'', price)
-    price = float(price)
-    return price
+    try:
+        match = _price_regexp.search(text)
+        price = match.group('price')
+        price = re.sub(ur'[$£,]', u'', price)
+        price = float(price)
+        return price
+    except:
+        warnings.warn('Error extracting price in text "{}"'.format(text))
+        raise
 
 def add_query(url, **kwargs):
     scheme, netloc, path, query_string, fragment = urlparse.urlsplit(url)
