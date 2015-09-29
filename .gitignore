@@ -2,6 +2,9 @@
 tests/config.json
 tests/cassettes/*
 
+# ignore foreman environment files
+.env
+
 # ignore compressed files
 # unzip them and commit those instead
 *.zip
