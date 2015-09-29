@@ -12,6 +12,7 @@ from amazon_scraper import (
     retry,
     rate_limit,
     extract_reviews_id,
+    process_rating,
     user_agent,
     get_review_date,
     html_parser,
@@ -93,9 +94,9 @@ class SubReview(object):
             rating = self.soup.find("i", class_=re.compile("review-rating"))
             if rating:
                 # normalize this to what we do in the Review class
-                self._rating = int(rating.text) / 5.0
+                self._rating = process_rating(rating.text)
             else:
-                self._rating = rating
+                self._rating = None
         return self._rating
 
     @property
