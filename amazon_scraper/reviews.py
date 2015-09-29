@@ -125,6 +125,10 @@ class SubReview(object):
             "url": self.url,
         }
 
+    @property
+    def full_review(self):
+        return self.api.review(self.id)
+
 
 class Reviews(object):
     def __init__(self, api, ItemId=None, URL=None):
