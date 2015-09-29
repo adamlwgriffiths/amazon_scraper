@@ -103,6 +103,9 @@ class Product(object):
 
         return reviews
 
+    def reviews(self):
+        return self.api.reviews(ItemId=self.asin)
+
     @property
     def author_bio(self):
         tag = self.soup.find('div', class_='mainContent')
