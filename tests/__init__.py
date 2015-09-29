@@ -43,26 +43,18 @@ class AmazonTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        config = {}
         try:
-            filename = os.path.join(os.path.dirname(__file__), 'config.json')
-            with open(filename, 'r') as f:
-                config = json.load(f)
-            assert config['access_key']
-            assert config['secret_key']
-            assert config['associate_tag']
+            config['access_key'] = os.environ['AWS_ACCESS_KEY_ID']
+            config['secret_key'] = os.environ['AWS_SECRET_ACCESS_KEY']
+            config['associate_tag'] = os.environ['AWS_ASSOCIATE_TAG']
         except:
             raise AssertionError('''
-                tests/config.json must be created with the following format:
-                    {
-                        "access_key":"KEY GOES HERE",
-                        "secret_key":"secret key goes here,
-                        "associate_tag":"associate tag goes here"
-                    }
+                The following environment variables must be set:
+                        "AWS_ACCESS_KEY_ID"
+                        "AWS_SECRET_ACCESS_KEY"
+                        "AWS_ASSOCIATE_TAG"
             ''')
-        config = {
-            k: str(v)
-            for k, v in config.iteritems()
-        }
         cls.amzn = AmazonScraper(MaxQPS=0.5, **config)
 
     def setUp(self):
