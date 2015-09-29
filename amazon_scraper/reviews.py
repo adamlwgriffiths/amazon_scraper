@@ -24,7 +24,7 @@ class SubReview(object):
     This object is different than the one in review.py because the reviews on the
     'reviews' page have a different HTML format. Thus we must parse them differently
     """
-    def __init__(self, reviews_soup, review_id, product_asin):
+    def __init__(self, api, reviews_soup, review_id, product_asin):
         self.soup = reviews_soup.find("div", id=review_id)
         if not self.soup:
             warnings.warn(
@@ -33,6 +33,7 @@ class SubReview(object):
             )
             raise ValueError()
 
+        self.api = api
         self._asin = product_asin
         self._author = None
         self._author_reviews_url = None
@@ -153,7 +154,7 @@ class Reviews(object):
 
         for review_id in self.ids:
             try:
-                review = SubReview(self.soup, review_id, self.asin)
+                review = SubReview(self.api, self.soup, review_id, self.asin)
             except ValueError:
                 continue
             self._all_reviews.append(review)
