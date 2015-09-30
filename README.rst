@@ -236,6 +236,7 @@ Get reviews that a single author has created::
     >>> ur = amzn.user_reviews(Id="A2W0GY64CJSV5D")
     >>> ur.brief_reviews
     >>> ur.name
+    >>> fr = list(ur.brief_reviews)[0].full_review()
 
 
 Get reviews for a user, from a review object
@@ -261,6 +262,7 @@ Iterate over all author reviews::
     >>> ur = amzn.user_reviews(Id="A2W0GY64CJSV5D")
     >>> for r in ur:
     >>>     print(r.id)
+
 
 
 Authors
