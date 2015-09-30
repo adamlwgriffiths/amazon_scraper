@@ -3,20 +3,22 @@
 import os
 del os.link
 
-from setuptools import setup, Extension
+from setuptools import setup
 
 # import the README
 with open('README.rst') as f:
     long_description = f.read()
 
-exec(open('amazon_scraper/version.py').read())
+__version__ = None
+with open('amazon_scraper/version.py') as f:
+    exec(f.read())
 
 setup(
     name="amazon_scraper",
     version=__version__,
     description="Provides content not accessible through the standard Amazon API",
     long_description=long_description,
-    license = 'BSD',
+    license='BSD',
     author="Adam Griffiths",
     url='https://github.com/adamlwgriffiths/amazon_scraper',
     test_suite='tests',
@@ -30,7 +32,6 @@ setup(
     ],
     platforms=['any'],
     classifiers=(
-        'Development Status :: 4 - Beta',
         'Natural Language :: English',
         'Intended Audience :: Developers',
         'Operating System :: MacOS :: MacOS X',
