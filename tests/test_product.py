@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import unittest
-import os
-import json
+from itertools import islice
 from tests import AmazonTestCase
 import amazon_scraper
 
@@ -13,7 +12,7 @@ class ProductTestCase(AmazonTestCase):
     def test_product(self):
         from amazon_scraper.product import Product
         p = self.amzn.api.lookup(ItemId='B00FLIJJSA')
-        p = Product(p)
+        p = Product(self.amzn, p)
         p.to_dict()
 
     def test_url(self):
@@ -44,7 +43,8 @@ class ProductTestCase(AmazonTestCase):
     def test_parent(self):
         p = self.amzn.lookup(ItemId='0933635869')
         # parent should be 7th edition 1568821816
-        p.parentAsin
+        result = p.parentAsin
+        expected = '1568821816'
         assert result == expected, (result, expected)
 
     def test_alternatives_media_matrix(self):
@@ -56,12 +56,13 @@ class ProductTestCase(AmazonTestCase):
     def test_alternatives_twisterMediaMatrix(self):
         p = self.amzn.lookup(ItemId='B00G3L7YT0')
         result = set(p.alternatives)
-        expected = set(['0425256863','B00FLY3XP4'])
+        expected = set(['0425256863', 'B00FLY3XP4'])
         assert result == expected, (result, expected)
 
     @unittest.skip("Unavailable items aren't handled yet")
     def test_unavailable_to_api(self):
-        p = self.amzn.lookup(ItemId='B00IKFMDMA')
+        #p = self.amzn.lookup(ItemId='B00IKFMDMA')
+        pass
 
     @unittest.skip("Author bio is now missing")
     def test_0575081570_author_bio(self):
@@ -163,9 +164,6 @@ class ProductTestCase(AmazonTestCase):
         expected = u'This dark, funny blend of SF and horror reads like James Bond'
         assert expected in text, (expected, text)
 
-    #def test_503ing_product(self):
-    #    p = self.from_asin(ItemId='1490475575')
-
     def test_iteration_14(self):
         # test #14
         p = self.amzn.lookup(ItemId='B00BGO0Q9O')
@@ -173,13 +171,22 @@ class ProductTestCase(AmazonTestCase):
         assert p.ratings
 
         rs = self.amzn.reviews(URL=p.reviews_url)
-        for r in rs:
-            assert r.title
+        for r in islice(rs, 50):
+            assert r.id
 
     def test_iteration_15(self):
         # test #15
-        for p in self.amzn.search(Keywords='python', SearchIndex='Books'):
+        for p in islice(self.amzn.search(Keywords='python', SearchIndex='Books'), 50):
             assert p.title
+
+    def test_reviews(self):
+        p = self.amzn.lookup(ItemId='B00BGO0Q9O')
+        assert p.title
+        assert p.ratings
+
+        rs = p.reviews()
+        for r in islice(rs, 50):
+            assert r.id
 
 
 if __name__ == '__main__':

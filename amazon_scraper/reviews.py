@@ -2,18 +2,17 @@ from __future__ import absolute_import
 import re
 from urlparse import urljoin
 import warnings
-import requests
 from bs4 import BeautifulSoup
 from amazon_scraper import (
+    get,
     review_url,
     reviews_url,
     extract_review_id,
+    extract_reviews_asin,
+    extract_reviewer_id,
     dict_acceptable,
     retry,
-    rate_limit,
-    extract_reviews_id,
     process_rating,
-    user_agent,
     get_review_date,
     html_parser,
     amazon_base,
@@ -25,24 +24,18 @@ class SubReview(object):
     This object is different than the one in review.py because the reviews on the
     'reviews' page have a different HTML format. Thus we must parse them differently
     """
-    def __init__(self, api, reviews_soup, review_id, product_asin):
-        self.soup = reviews_soup.find("div", id=review_id)
+    def __init__(self, api, soup, Id, ItemId):
+        self.soup = soup.find("div", id=Id)
         if not self.soup:
             warnings.warn(
                 "We were not able to find the review HTML for {} perhaps this means "
-                "that the parser is broken. File a bug".format(review_id)
+                "that the parser is broken. File a bug".format(Id)
             )
             raise ValueError()
 
         self.api = api
-        self._asin = product_asin
-        self._author = None
-        self._author_reviews_url = None
-        self._date = None
-        self._rating = None
-        self._text = None
-        self._title = None
-        self._id = review_id
+        self._asin = ItemId
+        self._id = Id
         self._url = review_url(self._id)
 
     def _parse_generic_property(self, var, tag, regex_term):
@@ -59,32 +52,33 @@ class SubReview(object):
         return self._asin
 
     @property
-    def author(self):
-        return self._parse_generic_property(self._author, "a", "author")
+    def name(self):
+        tag = self.soup.find('a', class_=re.compile('author'))
+        if tag:
+            return tag.text
 
     @property
-    def author_reviews_url(self):
+    def user_id(self):
+        return extract_reviewer_id(self.user_reviews_url)
+
+    def user_reviews(self):
+        return self.api.user_reviews(URL=self.user_reviews_url)
+
+    @property
+    def user_reviews_url(self):
         """
-        Get the page pointing to the author's reviews
+        Get the page pointing to the user's reviews
         """
-        if not self._author_reviews_url:
-            author_reviews_url = self.soup.find("a", class_=re.compile("author"))
-            if author_reviews_url:
-                tmp_url = urljoin(amazon_base, author_reviews_url.attrs["href"])
-                self._author_reviews_url = tmp_url.replace("pdp", "cdp").replace("profile", "member-reviews")
-            else:
-                self._author_reviews_url = author_reviews_url
-        return self._author_reviews_url
+        user_reviews_url = self.soup.find("a", class_=re.compile("author"))
+        if user_reviews_url:
+            tmp_url = urljoin(amazon_base, user_reviews_url.attrs["href"])
+            return tmp_url.replace("pdp", "cdp").replace("profile", "member-reviews")
 
     @property
     def date(self):
-        if not self._date:
-            date = self.soup.find("span", class_=re.compile("review-date"))
-            if date:
-                self._date = get_review_date(date.text)
-            else:
-                self._date = date
-        return self._date
+        date = self.soup.find("span", class_=re.compile("review-date"))
+        if date:
+            return get_review_date(date.text)
 
     @property
     def id(self):
@@ -92,22 +86,21 @@ class SubReview(object):
 
     @property
     def rating(self):
-        if not self._rating:
-            rating = self.soup.find("i", class_=re.compile("review-rating"))
-            if rating:
-                # normalize this to what we do in the Review class
-                self._rating = process_rating(rating.text)
-            else:
-                self._rating = None
-        return self._rating
+        rating = self.soup.find("i", class_=re.compile("review-rating"))
+        if rating:
+            return process_rating(rating.text)
 
     @property
     def title(self):
-        return self._parse_generic_property(self._title, "a", "review-title")
+        tag = self.soup.find('a', class_=re.compile('review-title'))
+        if tag:
+            return tag.text
 
     @property
     def text(self):
-        return self._parse_generic_property(self._text, "span", "review-text")
+        tag = self.soup.find('a', class_=re.compile('review-text'))
+        if tag:
+            return tag.text
 
     @property
     def url(self):
@@ -116,8 +109,9 @@ class SubReview(object):
     def to_dict(self):
         return {
             "asin": self.asin,
-            "author": self.author,
-            "author_reviews_url": self.author_reviews_url,
+            "name": self.name,
+            "user_id": self.user_id,
+            "user_reviews_url": self.user_reviews_url,
             "date": self.date,
             "id": self.id,
             "rating": self.rating,
@@ -145,44 +139,40 @@ class Reviews(object):
             # cleanup the url
             URL = reviews_url(extract_reviews_id(URL))
 
-        self._asin = re.search(r"\/product-reviews\/(\w+)\/", URL).groups()[0]
-        self._all_reviews = []
         self.api = api
         self._URL = URL
         self._soup = None
 
     @property
-    def all_reviews(self):
-        if self._all_reviews:
-            return self._all_reviews
-
-        for review_id in self.ids:
-            try:
-                review = SubReview(self.api, self.soup, review_id, self.asin)
-            except ValueError:
-                continue
-            self._all_reviews.append(review)
-        return self._all_reviews
-
-    @property
     @retry()
     def soup(self):
         if not self._soup:
-            r = requests.get(self._URL, headers={'User-Agent': user_agent}, verify=False)
-            r.raise_for_status()
+            r = get(self.url, self.api)
             self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
+
+    def full_reviews(self):
+        page = self
+        while page:
+            for review_id in page.ids:
+                yield self.api.review(Id=review_id)
+            page = Reviews(page.api, URL=page.next_page_url) if page.next_page_url else None
+
+    @property
+    def brief_reviews(self):
+        for review_id in self.ids:
+            yield SubReview(self.api, self.soup, review_id, self.asin)
 
     def __iter__(self):
         page = self
         while page:
-            for review_id in page.ids:
-                yield SubReview(page.api, page.soup, review_id, page.asin)
+            for r in page.brief_reviews:
+                yield r
             page = Reviews(page.api, URL=page.next_page_url) if page.next_page_url else None
 
     @property
     def asin(self):
-        return self._asin
+        return extract_reviews_asin(self.url)
 
     @property
     def url(self):
@@ -210,10 +200,13 @@ class Reviews(object):
             for id in self.ids
         ]
 
+    def product(self):
+        return self.api.product(ItemId=self.asin)
+
     def to_dict(self):
         d = {
             k: getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k, blacklist=['soup', '_URL', '_soup'])
+            if dict_acceptable(self, k, blacklist=['soup', '_URL', '_soup', 'product'])
         }
         return d

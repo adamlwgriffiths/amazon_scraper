@@ -1,16 +1,16 @@
 from __future__ import absolute_import
+import re
 from urlparse import urljoin
-import requests
 from bs4 import BeautifulSoup
 from amazon_scraper import (
+    get,
     review_url,
     extract_review_id,
+    extract_reviewer_id,
     process_rating,
     strip_html_tags,
     dict_acceptable,
     retry,
-    rate_limit,
-    user_agent,
     get_review_date,
     html_parser,
     amazon_base,
@@ -30,23 +30,23 @@ class Review(object):
 
         self.api = api
         self._URL = URL
+        self._id = extract_review_id(URL)
         self._soup = None
 
     @property
     @retry()
     def soup(self):
         if not self._soup:
-            rate_limit(self.api)
-            r = requests.get(self._URL, headers={'User-Agent': user_agent}, verify=False)
-            r.raise_for_status()
+            r = get(self.url, self.api)
             self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
 
     @property
     def id(self):
-        anchor = self.soup.find('a', attrs={'name': True}, text=False)
-        id = unicode(anchor['name'])
-        return id
+        #anchor = self.soup.find('a', attrs={'name': True}, text=False)
+        #id_ = unicode(anchor['name'])
+        #return id_
+        return self._id
 
     @property
     def asin(self):
@@ -83,29 +83,44 @@ class Review(object):
         return get_review_date(abbr["title"])
 
     @property
-    def author(self):
+    def user(self):
         vcard = self.soup.find('span', class_='reviewer vcard')
         if vcard:
             tag = vcard.find(class_='fn')
             if tag:
-                author = unicode(tag.string)
-                return author
+                user = unicode(tag.string)
+                return user
         return None
 
     @property
-    def author_reviews_url(self):
-        try:
-            vcard = self.soup.find('span', class_='reviewer vcard')
-            path = vcard.find("a").attrs["href"]
-        except (AttributeError, KeyError):
-            return None
-        else:
-            return urljoin(amazon_base, path.replace("pdp", "cdp").replace("profile", "member-reviews"))
+    def user_id(self):
+        url = self.user_reviews_url
+        if url:
+            return extract_reviewer_id(url)
+
+    def user_reviews(self):
+            url = self.user_reviews_url
+            if url:
+                return self.api.user_reviews(url)
+
+    @property
+    def user_reviews_url(self):
+        vcard = self.soup.find('span', class_='reviewer vcard')
+        if vcard:
+            anchor = vcard.find('a', href=re.compile(r'/pdp/'))
+            if anchor:
+                path = anchor.attrs['href']
+                path = path.replace('pdp', 'cdp')
+                path = path.replace('profile', 'member-reviews')
+                return urljoin(amazon_base, path)
 
     @property
     def text(self):
         tag = self.soup.find('span', class_='description')
         return strip_html_tags(unicode(tag))
+
+    def product(self):
+        return self.api.product(ItemId=self.asin)
 
     def to_dict(self):
         d = {

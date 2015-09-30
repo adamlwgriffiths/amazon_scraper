@@ -8,12 +8,13 @@ import functools
 import time
 import requests
 import warnings
-from HTMLParser import HTMLParser
 from amazon.api import AmazonAPI
 import dateutil.parser
 from bs4 import BeautifulSoup
 from .version import __version__  # load our version
 
+# stop warnings about unused variable
+__version__
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,13 @@ user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 
 amazon_base = 'http://www.amazon.com'
 
 _extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
+_process_rating_regexp = re.compile(r'([\d\.]+) out of [\d\.]+ stars', flags=re.I)
+_extract_reviews_asin_regexp = re.compile(r'/product-reviews/(?P<asin>[^/]+)', flags=re.I)
+_extract_review_id_regexp = re.compile(r'/review/(?P<id>[^/]+)', flags=re.I)
+_extract_reviewer_id_regexp = re.compile(r'/member-reviews/(?P<id>[^/]+)', flags=re.I)
+_price_regexp = re.compile(ur'(?P<price>[$£][\d,\.]+)', flags=re.I)
+
+
 def extract_asin(url):
     try:
         match = _extract_asin_regexp.search(url)
@@ -37,22 +45,31 @@ def extract_asin(url):
         warnings.warn('Error matching ASIN in URL {}'.format(url))
         raise
 
+
 def product_url(asin):
     url = '{base}/dp/{asin}'
     return url.format(base=amazon_base, asin=asin)
 
+
 def add_affiliate(url, affiliate):
     return add_query(url, tag=affiliate)
+
 
 def reviews_url(asin):
     url = '{base}/product-reviews/{asin}/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending'
     return url.format(base=amazon_base, asin=asin)
 
+
 def review_url(id):
     url = '{base}/review/{id}'
     return url.format(base=amazon_base, id=id)
 
-_process_rating_regexp = re.compile(r'([\d\.]+) out of [\d\.]+ stars', flags=re.I)
+
+def reviewer_url(id):
+    url = '{base}/gp/cdp/member-reviews/{id}'
+    return url.format(base=amazon_base, id=id)
+
+
 def process_rating(text):
     """The rating normalised to 1.0
     """
@@ -63,16 +80,16 @@ def process_rating(text):
         warnings.warn('Error processing rating for text "{}"'.format(text))
         raise
 
-_extract_reviews_id_regexp = re.compile(r'/product-reviews/(?P<id>[^/]+)', flags=re.I)
-def extract_reviews_id(url):
+
+def extract_reviews_asin(url):
     try:
-        match = _extract_reviews_id_regexp.search(url)
-        return str(match.group('id'))
+        match = _extract_reviews_asin_regexp.search(url)
+        return str(match.group('asin'))
     except:
-        warnings.warn('Error matching reviews ID in URL {}'.format(url))
+        warnings.warn('Error matching reviews ASIN in URL {}'.format(url))
         raise
 
-_extract_review_id_regexp = re.compile(r'/review/(?P<id>[^/]+)', flags=re.I)
+
 def extract_review_id(url):
     try:
         match = _extract_review_id_regexp.search(url)
@@ -81,7 +98,16 @@ def extract_review_id(url):
         warnings.warn('Error matching review ID in URL {}'.format(url))
         raise
 
-_price_regexp = re.compile(ur'(?P<price>[$£][\d,\.]+)', flags=re.I)
+
+def extract_reviewer_id(url):
+    try:
+        match = _extract_reviewer_id_regexp.search(url)
+        return str(match.group('id'))
+    except:
+        warnings.warn('Error matching review ID in URL {}'.format(url))
+        raise
+
+
 def extract_price(text):
     try:
         match = _price_regexp.search(text)
@@ -92,6 +118,7 @@ def extract_price(text):
     except:
         warnings.warn('Error extracting price in text "{}"'.format(text))
         raise
+
 
 def add_query(url, **kwargs):
     scheme, netloc, path, query_string, fragment = urlparse.urlsplit(url)
@@ -119,6 +146,7 @@ def strip_html_tags(html):
         return text
     return None
 
+
 def retry(retries=5, exceptions=None):
     if not exceptions:
         exceptions = (BaseException,)
@@ -141,6 +169,15 @@ def retry(retries=5, exceptions=None):
         return decorator
     return outer
 
+
+def get(url, api):
+    rate_limit(api)
+    # verify=False ignores SSL errors
+    r = requests.get(url, headers={'User-Agent': user_agent}, verify=False)
+    r.raise_for_status()
+    return r
+
+
 def is_property(obj, k):
     # only accept @property decorated functions
     # these can only be detected via the __class__ object
@@ -148,6 +185,7 @@ def is_property(obj, k):
         if isinstance(getattr(obj.__class__, k), property):
             return True
     return False
+
 
 def dict_acceptable(obj, k, blacklist=None):
     # don't store blacklisted variables
@@ -158,29 +196,30 @@ def dict_acceptable(obj, k, blacklist=None):
         return False
     return is_property(obj, k)
 
+
 def rate_limit(api):
     # apply rate limiting
     # this is taken from bottlenose/api.py
-    # AmazonScraper -> SimpleProductAPI -> BottleNose
-    api = api.api.api
-    if api.MaxQPS:
-        last_query_time = api._last_query_time[0]
+    bn = api.bottlenose
+    if bn.MaxQPS:
+        last_query_time = bn._last_query_time[0]
         if last_query_time:
-                wait_time = 1 / api.MaxQPS - (time.time() - last_query_time)
-                if wait_time > 0:
-                    log.debug('Waiting %.3fs to call Amazon API' % wait_time)
-                    time.sleep(wait_time)
-        api._last_query_time[0] = time.time()
+            wait_time = 1 / bn.MaxQPS - (time.time() - last_query_time)
+            if wait_time > 0:
+                log.debug('Waiting %.3fs to call Amazon API' % wait_time)
+                time.sleep(wait_time)
+        bn._last_query_time[0] = time.time()
 
-#This schema of imports is non-standard and should change. It will require some re-ordering of
-#functions inside the package though.
+# This schema of imports is non-standard and should change. It will require some re-ordering of
+# functions inside the package though.
 from amazon_scraper.product import Product
 from amazon_scraper.reviews import Reviews
 from amazon_scraper.review import Review
-from amazon_scraper.reviewer import Reviewer
+from amazon_scraper.user_reviews import UserReviews
 
 
 class AmazonScraper(object):
+
     def __init__(self, access_key, secret_key, associate_tag, *args, **kwargs):
         self.api = AmazonAPI(access_key, secret_key, associate_tag, *args, **kwargs)
 
@@ -190,31 +229,39 @@ class AmazonScraper(object):
     def review(self, Id=None, URL=None):
         return Review(self, Id, URL)
 
-    def reviewer(self, url):
-        return Reviewer(url)
+    def user_reviews(self, Id=None, URL=None):
+        return UserReviews(self, Id, URL)
 
     def lookup(self, URL=None, **kwargs):
         if URL:
             kwargs['ItemId'] = extract_asin(URL)
 
-        result = self.api.lookup(**kwargs)
+        result = self.amazon_simple_api.lookup(**kwargs)
         if isinstance(result, (list, tuple)):
-            result = [Product(p) for p in result]
+            result = [Product(self, p) for p in result]
         else:
-            result = Product(result)
+            result = Product(self, result)
         return result
 
     def similarity_lookup(self, **kwargs):
-        for p in self.api.similarity_lookup(**kwargs):
-            yield Product(p)
+        for p in self.amazon_simple_api.similarity_lookup(**kwargs):
+            yield Product(self, p)
 
     def browse_node_lookup(self, **kwargs):
-        return self.api.browse_node_lookup(**kwargs)
+        return self.amazon_simple_api.browse_node_lookup(**kwargs)
 
     def search(self, **kwargs):
-        for p in self.api.search(**kwargs):
-            yield Product(p)
+        for p in self.amazon_simple_api.search(**kwargs):
+            yield Product(self, p)
 
     def search_n(self, n, **kwargs):
-        for p in self.api.search_n(n, **kwargs):
-            yield Product(p)
+        for p in self.amazon_simple_api.search_n(n, **kwargs):
+            yield Product(self, p)
+
+    @property
+    def amazon_simple_api(self):
+        return self.api
+
+    @property
+    def bottlenose(self):
+        return self.api.api

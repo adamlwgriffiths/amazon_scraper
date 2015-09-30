@@ -4,25 +4,23 @@ import urllib
 import json
 import re
 import xmltodict
-import requests
 from bs4 import BeautifulSoup
 from amazon_scraper import (
+    get,
     product_url,
     extract_asin,
     reviews_url,
     strip_html_tags,
     dict_acceptable,
     retry,
-    rate_limit,
-    extract_reviews_id,
-    user_agent,
     html_parser,
     amazon_base,
 )
 
 
 class Product(object):
-    def __init__(self, product):
+    def __init__(self, api, product):
+        self.api = api
         self.product = product
         self._soup = None
 
@@ -38,11 +36,7 @@ class Product(object):
         # lazily load the soup
         # otherwise we will slow down simple operations
         if not self._soup:
-            url = product_url(self.asin)
-            rate_limit(self.api)
-            # verify=False ignores SSL errors
-            r = requests.get(url, headers={'User-Agent': user_agent}, verify=False)
-            r.raise_for_status()
+            r = get(self.url, self.api)
             self._soup = BeautifulSoup(r.text, html_parser)
         return self._soup
 
@@ -240,6 +234,13 @@ class Product(object):
             if text:
                 result.append(text)
 
+        # http://www.amazon.com/dp/B00DHF39KS
+        tag = self.soup.find('div', class_='aplus')
+        if tag:
+            text = strip_html_tags(unicode(tag))
+            if text:
+                result.append(text)
+
         return result
 
     def to_dict(self):
@@ -265,6 +266,6 @@ class Product(object):
         d.update({
             k: getattr(self, k)
             for k in dir(self)
-            if dict_acceptable(self, k, blacklist=['soup', 'api', 'ratings'])
+            if dict_acceptable(self, k, blacklist=['soup', 'api', 'ratings', 'reviews'])
         })
         return d

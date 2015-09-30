@@ -152,7 +152,7 @@ Review API
 View lists of reviews::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')
-    >>> rs = amzn.reviews(URL=p.reviews_url)
+    >>> rs = p.reviews()
     >>> rs.asin
     B0051QVF7A
     >>> # print the reviews on this first page
@@ -161,7 +161,16 @@ View lists of reviews::
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
     >>> # by iterating over the reviews object we get access to reviews on ALL pages
-    >>> for r in rs:
+    >>> for r in rs.brief_reviews:
+    >>>     print(r.id)
+    'R3MF0NIRI3BT1E'
+    'R3N2XPJT4I1XTI'
+    'RWG7OQ5NMGUMW'
+    ...
+
+View detailed reviews::
+    >>> rs = amzn.reviews(ItemId='B0051QVF7A')
+    >>> for r in rs.full_reviews():
     >>>     print(r.id)
     'R3MF0NIRI3BT1E'
     'R3N2XPJT4I1XTI'
@@ -169,17 +178,19 @@ View lists of reviews::
     ...
 
 Quickly get a list of all reviews on a review page using the `all_reviews` property.
-This uses the brief reviews provided on the product page to avoid downloading each review separately. As such, some information
+This uses the brief reviews provided on the review page to avoid downloading each review separately. As such, some information
 may not be accessible::
 
     >>> p = amzn.lookup(ItemId='B0051QVF7A')
-    >>> rs = amzn.reviews(URL=p.reviews_url)
-    >>> all_reviews_on_page = rs.all_reviews
+    >>> rs = p.reviews()
+    >>> all_reviews_on_page = list(rs)
     >>> len(all_reviews_on_page)
     10
-    >>> all_reviews_on_page[0].to_dict()["title"]
+    >>> r = all_reviews_on_page[0]
+    >>> r.title
     'Fantastic device - pick your Kindle!'
-    >>> all_reviews_on_page[0].full_review().title
+    >>> fr = r.full_review()
+    >>> fr.title
     'Fantastic device - pick your Kindle!'
 
 By ASIN/ItemId::
@@ -193,7 +204,8 @@ By ASIN/ItemId::
 
 For individual reviews use the `review` method::
 
-    >>> r = amzn.review(Id=rs.ids[0])
+    >>> review_id = 'R3MF0NIRI3BT1E'
+    >>> r = amzn.review(Id=review_id)
     >>> r.id
     R3MF0NIRI3BT1E
     >>> r.asin
@@ -215,26 +227,40 @@ By URL::
     R3MF0NIRI3BT1E
 
 
-Reviewer API
-~~~~~~~~~~~~
-This package also supports getting information about specific reviewers and the reviews 
-they have written over time. It is advisable to first look up a reviewer via another one
-of the products they have reviewed though. This situation will be improved in the future 
-though.
+User Reviews API
+~~~~~~~~~~~~~~~~~~
+This package also supports getting reviews written by a specific user.
 
-Get reviews that a single reviewer has created::
+Get reviews that a single author has created::
+
+    >>> ur = amzn.user_reviews(Id="A2W0GY64CJSV5D")
+    >>> ur.brief_reviews
+    >>> ur.name
 
 
-    r = self.amzn.review(Id="R3MF0NIRI3BT1E")
-    reviewer = self.amzn.reviewer(r.author_reviews_url)
-    all_reviews = reviewer.all_reviews
+Get reviews for a user, from a review object
 
-Iterate to the authors next review page if they have one::
+    >>> r = amzn.review(Id="R3MF0NIRI3BT1E")
+    >>> # we can get the reviews directly, or via the API with a URL or ID
+    >>> ur = r.user_reviews()
+    >>> ur = amzn.user_reviews(URL=r.author_reviews_url)
+    >>> ur = amzn.user_reviews(Id=r.author_id)
+    >>> ur.brief_reviews
+    >>> ur.name
 
-    r = self.amzn.review(Id="R3MF0NIRI3BT1E")
-    reviewer = self.amzn.reviewer(r.author_reviews_url)
-    reviewer = self.amzn.reviewer(reviewer.next_page_url)
-    second_page_reviews = reviewer.all_reviews
+
+Iterate over the current page's reviews::
+
+    >>> ur = amzn.user_reviews(Id="A2W0GY64CJSV5D")
+    >>> for r in ur.brief_reviews:
+    >>>     print(r.id)
+
+
+Iterate over all author reviews::
+
+    >>> ur = amzn.user_reviews(Id="A2W0GY64CJSV5D")
+    >>> for r in ur:
+    >>>     print(r.id)
 
 
 Authors

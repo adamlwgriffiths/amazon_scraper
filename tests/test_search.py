@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 import unittest
-import os
-import itertools
+from itertools import islice
 from tests import AmazonTestCase
 
 
 class SearchTestCase(AmazonTestCase):
     def test_search(self):
-        for p in itertools.islice(self.amzn.search(Keywords='python', SearchIndex='Books'), 5):
+        for p in islice(self.amzn.search(Keywords='python', SearchIndex='Books'), 5):
             self.verify_product(p)
 
     def test_search_n(self):
