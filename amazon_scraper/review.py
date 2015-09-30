@@ -99,9 +99,9 @@ class Review(object):
             return extract_reviewer_id(url)
 
     def user_reviews(self):
-            url = self.user_reviews_url
-            if url:
-                return self.api.user_reviews(url)
+        url = self.user_reviews_url
+        if url:
+            return self.api.user_reviews(URL=url)
 
     @property
     def user_reviews_url(self):
@@ -110,8 +110,8 @@ class Review(object):
             anchor = vcard.find('a', href=re.compile(r'/pdp/'))
             if anchor:
                 path = anchor.attrs['href']
-                path = path.replace('pdp', 'cdp')
-                path = path.replace('profile', 'member-reviews')
+                path = path.replace('/pdp/', '/cdp/')
+                path = path.replace('/profile/', '/member-reviews/')
                 return urljoin(amazon_base, path)
 
     @property
