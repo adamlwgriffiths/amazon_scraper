@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 import re
-from urlparse import urljoin
+try:
+    import urlparse
+except:
+    import urllib.parse as urlparse
 import warnings
 from bs4 import BeautifulSoup
 from amazon_scraper import (
@@ -17,6 +20,9 @@ from amazon_scraper import (
     html_parser,
     amazon_base,
 )
+
+if 'unicode' not in dir(globals()['__builtins__']):
+    unicode = str
 
 
 class SubReview(object):
@@ -71,7 +77,7 @@ class SubReview(object):
         """
         user_reviews_url = self.soup.find("a", class_=re.compile("author"))
         if user_reviews_url:
-            tmp_url = urljoin(amazon_base, user_reviews_url.attrs["href"])
+            tmp_url = urlparse.urljoin(amazon_base, user_reviews_url.attrs["href"])
             return tmp_url.replace("pdp", "cdp").replace("profile", "member-reviews")
 
     @property
@@ -183,7 +189,7 @@ class Reviews(object):
         # lazy loading causes this to differ from the HTML visible in chrome
         anchor = self.soup.find('a', href=re.compile(r'product-reviews.*next', flags=re.I))
         if anchor:
-            return urljoin(amazon_base, unicode(anchor['href']))
+            return urlparse.urljoin(amazon_base, unicode(anchor['href']))
         return None
 
     @property

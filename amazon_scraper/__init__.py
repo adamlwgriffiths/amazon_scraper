@@ -2,7 +2,10 @@
 from __future__ import absolute_import
 import logging
 import re
-import urlparse
+try:
+    import urlparse
+except:
+    import urllib.parse as urlparse
 import urllib
 import functools
 import time
@@ -12,6 +15,9 @@ from amazon.api import AmazonAPI
 import dateutil.parser
 from bs4 import BeautifulSoup
 from .version import __version__  # load our version
+
+if 'unicode' not in dir(globals()['__builtins__']):
+    unicode = str
 
 # stop warnings about unused variable
 __version__
@@ -34,7 +40,7 @@ _process_rating_regexp = re.compile(r'([\d\.]+) out of [\d\.]+ stars', flags=re.
 _extract_reviews_asin_regexp = re.compile(r'/product-reviews/(?P<asin>[^/]+)', flags=re.I)
 _extract_review_id_regexp = re.compile(r'/review/(?P<id>[^/]+)', flags=re.I)
 _extract_reviewer_id_regexp = re.compile(r'/member-reviews/(?P<id>[^/]+)', flags=re.I)
-_price_regexp = re.compile(ur'(?P<price>[$£][\d,\.]+)', flags=re.I)
+_price_regexp = re.compile(r'(?P<price>[$£][\d,\.]+)', flags=re.I)
 
 
 def extract_asin(url):
@@ -112,7 +118,7 @@ def extract_price(text):
     try:
         match = _price_regexp.search(text)
         price = match.group('price')
-        price = re.sub(ur'[$£,]', u'', price)
+        price = re.sub(r'[$£,]', u'', price)
         price = float(price)
         return price
     except:

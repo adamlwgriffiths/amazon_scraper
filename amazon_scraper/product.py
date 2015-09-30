@@ -1,5 +1,8 @@
 from __future__ import absolute_import
-import urlparse
+try:
+    import urlparse
+except:
+    import urllib.parse as urlparse
 import urllib
 import json
 import re
@@ -16,6 +19,9 @@ from amazon_scraper import (
     html_parser,
     amazon_base,
 )
+
+if 'unicode' not in dir(globals()['__builtins__']):
+    unicode = str
 
 
 class Product(object):
@@ -54,7 +60,7 @@ class Product(object):
         if tag:
             asins = set([
                 extract_asin(anchor['href'])
-                for anchor in tag.find_all('a', href=re.compile(ur'/dp/'))
+                for anchor in tag.find_all('a', href=re.compile(r'/dp/'))
             ])
             if self.asin in asins:
                 asins.remove(self.asin)
@@ -65,7 +71,7 @@ class Product(object):
         if tag:
             asins = set([
                 extract_asin(anchor['href'])
-                for anchor in tag.find_all('a', href=re.compile(ur'/dp/'))
+                for anchor in tag.find_all('a', href=re.compile(r'/dp/'))
             ])
             if self.asin in asins:
                 asins.remove(self.asin)
@@ -183,9 +189,9 @@ class Product(object):
 
         # extract from the javascript code that updates the iframe
         # http://www.amazon.com/dp/1491268727
-        tag = self.soup.find('script', text=re.compile(ur'bookDescEncodedData', flags=re.I))
+        tag = self.soup.find('script', text=re.compile(r'bookDescEncodedData', flags=re.I))
         if tag:
-            match = re.search(ur'bookDescEncodedData\s=\s"(?P<description>[^",]+)', tag.text)
+            match = re.search(r'bookDescEncodedData\s=\s"(?P<description>[^",]+)', tag.text)
             if match:
                 text = match.group('description')
                 text = urllib.unquote(text)

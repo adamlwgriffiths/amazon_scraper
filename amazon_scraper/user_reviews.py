@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 import re
-from urlparse import urljoin
+try:
+    import urlparse
+except:
+    import urllib.parse as urlparse
 from bs4 import BeautifulSoup
 from amazon_scraper import (
     get,
@@ -14,6 +17,9 @@ from amazon_scraper import (
     process_rating,
     amazon_base,
 )
+
+if 'unicode' not in dir(globals()['__builtins__']):
+    unicode = str
 
 
 class UserReviewsSubReview(object):
@@ -144,7 +150,7 @@ class UserReviews(object):
         next_page_tag = self.soup.find('a', href=re.compile(r'page=\d+'), text=page_number)
 
         if next_page_tag:
-            return urljoin(amazon_base, next_page_tag.attrs['href'])
+            return urlparse.urljoin(amazon_base, next_page_tag.attrs['href'])
 
     @property
     def id(self):

@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 import re
-from urlparse import urljoin
+try:
+    import urlparse
+except:
+    import urllib.parse as urlparse
 from bs4 import BeautifulSoup
 from amazon_scraper import (
     get,
@@ -15,6 +18,9 @@ from amazon_scraper import (
     html_parser,
     amazon_base,
 )
+
+if 'unicode' not in dir(globals()['__builtins__']):
+    unicode = str
 
 
 class Review(object):
@@ -69,7 +75,8 @@ class Review(object):
         """The rating of the product normalised to 1.0
         """
         for li in self.soup.find_all('li', class_='rating'):
-            string = li.stripped_strings.next().lower()
+            # get the second string
+            string = next(li.stripped_strings).lower()
             if 'overall:' not in string:
                 continue
 
@@ -112,7 +119,7 @@ class Review(object):
                 path = anchor.attrs['href']
                 path = path.replace('/pdp/', '/cdp/')
                 path = path.replace('/profile/', '/member-reviews/')
-                return urljoin(amazon_base, path)
+                return urlparse.urljoin(amazon_base, path)
 
     @property
     def text(self):
