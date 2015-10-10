@@ -35,7 +35,7 @@ user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 
 
 amazon_base = 'http://www.amazon.com'
 
-_extract_asin_regexp = re.compile(r'/dp/(?P<asin>[^/]+)')
+_extract_asin_regexp = re.compile(r'(/dp/|/gp/product/)(?P<asin>[^/]+)/')
 _process_rating_regexp = re.compile(r'([\d\.]+) out of [\d\.]+ stars', flags=re.I)
 _extract_reviews_asin_regexp = re.compile(r'/product-reviews/(?P<asin>[^/]+)', flags=re.I)
 _extract_review_id_regexp = re.compile(r'/review/(?P<id>[^/]+)', flags=re.I)
