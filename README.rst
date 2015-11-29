@@ -160,8 +160,15 @@ View lists of reviews::
     ['R3MF0NIRI3BT1E', 'R3N2XPJT4I1XTI', 'RWG7OQ5NMGUMW', 'R1FKKJWTJC4EAP', 'RR8NWZ0IXWX7K', 'R32AU655LW6HPU', 'R33XK7OO7TO68E', 'R3NJRC6XH88RBR', 'R21JS32BNNQ82O', 'R2C9KPSEH78IF7']
     >>> rs.url
     http://www.amazon.com/product-reviews/B0051QVF7A/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
-    >>> # by iterating over the reviews object we get access to reviews on ALL pages
+    >>> # iterate over reviews on this page only
     >>> for r in rs.brief_reviews:
+    >>>     print(r.id)
+    'R3MF0NIRI3BT1E'
+    'R3N2XPJT4I1XTI'
+    'RWG7OQ5NMGUMW'
+    ...
+    >>> # iterate over all brief reviews on all pages
+    >>> for r in rs:
     >>>     print(r.id)
     'R3MF0NIRI3BT1E'
     'R3N2XPJT4I1XTI'
@@ -171,12 +178,24 @@ View lists of reviews::
 View detailed reviews::
 
     >>> rs = amzn.reviews(ItemId='B0051QVF7A')
+    >>> # this will iterate over all reviews on all pages
+    >>> # each review will require a download as it is on a seperate page
     >>> for r in rs.full_reviews():
     >>>     print(r.id)
     'R3MF0NIRI3BT1E'
     'R3N2XPJT4I1XTI'
     'RWG7OQ5NMGUMW'
     ...
+    
+Convert a brief review to a full review::
+
+    >>> rs = amzn.reviews(ItemId='B0051QVF7A')
+    >>> # this will iterate over all reviews on all pages
+    >>> # each review will require a download as it is on a seperate page
+    >>> for r in rs:
+    >>>     print(r.id)
+    >>>     fr = r.full_review()
+    >>>     print(fr.id)
 
 Quickly get a list of all reviews on a review page using the `all_reviews` property.
 This uses the brief reviews provided on the review page to avoid downloading each review separately. As such, some information
