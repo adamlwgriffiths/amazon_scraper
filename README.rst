@@ -169,6 +169,7 @@ View lists of reviews::
     ...
 
 View detailed reviews::
+
     >>> rs = amzn.reviews(ItemId='B0051QVF7A')
     >>> for r in rs.full_reviews():
     >>>     print(r.id)
