@@ -89,6 +89,11 @@ class ReviewsTestCase(AmazonTestCase):
             full = r.full_review()
             assert full.id == r.id
 
+    def test_B012DTDBI8(self):
+        p = self.amzn.lookup(ItemId='B012DTDBI8')
+        rs = self.amzn.reviews(URL=p.reviews_url)
+        assert rs.next_page_url
+
 
 if __name__ == '__main__':
     unittest.main()

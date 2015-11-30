@@ -188,6 +188,11 @@ class Reviews(object):
     def next_page_url(self):
         # lazy loading causes this to differ from the HTML visible in chrome
         anchor = self.soup.find('a', href=re.compile(r'product-reviews.*next', flags=re.I))
+        if not anchor:
+            for a in self.soup.find_all('a', href=re.compile(r'product-reviews', flags=re.I)):
+                if 'next' in a.text.lower():
+                    anchor = a
+                    break
         if anchor:
             return urlparse.urljoin(amazon_base, unicode(anchor['href']))
         return None
