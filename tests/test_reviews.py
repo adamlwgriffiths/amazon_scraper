@@ -93,6 +93,8 @@ class ReviewsTestCase(AmazonTestCase):
         p = self.amzn.lookup(ItemId='B012DTDBI8')
         rs = self.amzn.reviews(URL=p.reviews_url)
         assert rs.next_page_url
+        assert len(list(islice(rs, 15))) > 10
+        assert len(list(islice(rs.full_reviews(), 15))) > 10
 
 
 if __name__ == '__main__':
