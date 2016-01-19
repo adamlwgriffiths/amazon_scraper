@@ -1,7 +1,10 @@
 # fix building inside a virtualbox VM
 # http://bugs.python.org/issue8876#msg208792
-import os
-del os.link
+try:
+    import os
+    del os.link
+except:
+    pass
 
 from setuptools import setup
 
