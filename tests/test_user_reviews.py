@@ -19,7 +19,7 @@ class UserReviewsTestCase(AmazonTestCase):
         reviewer = self.amzn.user_reviews(URL=r.user_reviews_url)
 
         for review in islice(reviewer.brief_reviews, 5):
-            print review.id
+            print(review.id)
             assert review.id
             fr = review.full_review()
             assert fr.id == review.id, (fr.id, review.id)
