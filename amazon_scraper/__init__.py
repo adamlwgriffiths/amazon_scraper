@@ -139,6 +139,8 @@ def add_query(url, **kwargs):
 
 def get_review_date(raw_date):
     string = unicode(raw_date)
+    # remove prefix (e.g. 'on', 'vom', 'il', ...) from date string before parsing
+    string = ' '.join(string.split(' ')[1:])
     # 2011-11-07T05:50:41Z
     date = dateutil.parser.parse(string)
     return date
