@@ -2,7 +2,7 @@ from dateutil import parser
 
 class GermanParserInfo(parser.parserinfo):
     MONTHS = [('Jan', 'Januar'),
-              ('Feb', 'Febraur'),
+              ('Feb', 'Februar'),
               ('Mär', 'März'),
               ('Apr', 'April'),
               ('Mai', 'Mai'),
