@@ -8,6 +8,8 @@ except:
     import urllib.parse as urlparse
 import urllib
 import functools
+import locale
+import calendar
 import time
 import requests
 import warnings
@@ -28,9 +30,9 @@ log = logging.getLogger(__name__)
 # 'html.parser' has trouble with http://www.amazon.com/product-reviews/B00008MOQA/ref=cm_cr_pr_top_sort_recent?&sortBy=bySubmissionDateDescending
 # it sometimes doesn't find the asin span
 html_parser = 'html.parser'
-#html_parser = 'html5lib'
+# html_parser = 'html5lib'
 
-#user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
+# user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36'
 
 amazon_base = 'http://www.amazon.com'
@@ -204,11 +206,6 @@ def dict_acceptable(obj, k, blacklist=None):
         return False
     return is_property(obj, k)
 
-from amazon_scraper import parserinfo
-
-def get_date_parserinfo(region_str):
-    if region_str == 'DE': return parserinfo.GermanParserInfo()
-    return None
 
 def rate_limit(api):
     # apply rate limiting
@@ -223,6 +220,15 @@ def rate_limit(api):
                 time.sleep(wait_time)
         bn._last_query_time[0] = time.time()
 
+
+def get_parserinfo(region):
+    tmp_locale = locale.getlocale(locale.LC_ALL)
+    new_locale = locale.locale_alias[region.lower()] if region.lower() in locale.locale_alias else locale.locale_alias['en']
+    locale.setlocale(locale.LC_ALL, new_locale)
+    parserinfo = CustomParserInfo()
+    locale.setlocale(locale.LC_ALL, '.'.join(tmp_locale))
+    return parserinfo
+
 # This schema of imports is non-standard and should change. It will require some re-ordering of
 # functions inside the package though.
 from amazon_scraper.product import Product
@@ -231,19 +237,26 @@ from amazon_scraper.review import Review
 from amazon_scraper.user_reviews import UserReviews
 
 
-class AmazonScraper(object):
+class CustomParserInfo(dateutil.parser.parserinfo):
+    def __init__(self):
+        abbr = list(calendar.month_abbr)[1:]
+        months = list(calendar.month_name)[1:]
+        self.MONTHS = [(abbr[i], months[i]) for i in range(len(abbr))]
+        super().__init__()
 
+class AmazonScraper(object):
     def __init__(self, access_key, secret_key, associate_tag, *args, **kwargs):
         self.api = AmazonAPI(access_key, secret_key, associate_tag, *args, **kwargs)
+        self.parserinfo = get_parserinfo(self.api.region)
 
     def reviews(self, ItemId=None, URL=None):
-        return Reviews(self, ItemId, URL, parserinfo=get_date_parserinfo(self.api.region))
+        return Reviews(self, ItemId, URL, parserinfo=self.parserinfo)
 
     def review(self, Id=None, URL=None):
-        return Review(self, Id, URL, parserinfo=get_date_parserinfo(self.api.region))
+        return Review(self, Id, URL, parserinfo=self.parserinfo)
 
     def user_reviews(self, Id=None, URL=None):
-        return UserReviews(self, Id, URL, parserinfo=get_date_parserinfo(self.api.region))
+        return UserReviews(self, Id, URL, parserinfo=self.parserinfo)
 
     def lookup(self, URL=None, **kwargs):
         if URL:
