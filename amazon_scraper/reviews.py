@@ -104,7 +104,8 @@ class SubReview(object):
 
     @property
     def text(self):
-        tag = self.soup.find('a', class_=re.compile('review-text'))
+        tag = self.soup.find('span', class_=re.compile('review-text'))
+        if not tag: tag = self.soup.find('a', class_=re.compile('review-text'))
         if tag:
             return tag.text
 
