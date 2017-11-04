@@ -28,11 +28,12 @@ class UserReviewsSubReview(object):
     sift out most of the information needed in the main UserReview class and then send it here when
     we find the HTML we need.
     """
-    def __init__(self, api, reviewer, soup, id):
+    def __init__(self, api, reviewer, soup, id, parserinfo=None):
         self.api = api
         self._soup = soup
         self._reviewer = reviewer
         self._id = id
+        self.parserinfo = parserinfo
 
     @property
     def asin(self):
@@ -55,7 +56,7 @@ class UserReviewsSubReview(object):
     def date(self):
         #date_tag = self.soup.find('nobr')
         date_tag = self.soup.find(class_='review-date')
-        return get_review_date(date_tag.text)
+        return get_review_date(date_tag.text, self.parserinfo)
 
     @property
     def id(self):
@@ -107,7 +108,7 @@ class UserReviews(object):
 
     :param url: A url pointing to the reviewer's cdp/member-reviews list
     """
-    def __init__(self, api, Id=None, URL=None):
+    def __init__(self, api, Id=None, URL=None, parserinfo=None):
         if Id and not URL:
             URL = reviewer_url(Id)
         elif URL and not Id:
@@ -123,6 +124,7 @@ class UserReviews(object):
         self._id = Id
         self._url = URL
         self._soup = None
+        self.parserinfo = parserinfo
 
     @property
     @retry()
@@ -168,7 +170,7 @@ class UserReviews(object):
         for id_tag in ids:
             id_ = id_tag.attrs['name']
             soup = id_tag.findParent('tr', valign='top')
-            yield UserReviewsSubReview(self.api, self, soup, id_)
+            yield UserReviewsSubReview(self.api, self, soup, id_, self.parserinfo)
 
     def ids(self):
         # First get all review ids on the page

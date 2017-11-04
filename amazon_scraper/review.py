@@ -24,7 +24,7 @@ if 'unicode' not in dir(globals()['__builtins__']):
 
 
 class Review(object):
-    def __init__(self, api, Id=None, URL=None):
+    def __init__(self, api, Id=None, URL=None, parserinfo=None):
         if Id and not URL:
             if 'amazon' in Id:
                 raise ValueError('URL passed as ID')
@@ -38,6 +38,7 @@ class Review(object):
         self._URL = URL
         self._id = extract_review_id(URL)
         self._soup = None
+        self.parserinfo = parserinfo
 
     @property
     @retry()
@@ -87,7 +88,7 @@ class Review(object):
     @property
     def date(self):
         abbr = self.soup.find('abbr', class_='dtreviewed')
-        return get_review_date(abbr["title"])
+        return get_review_date(abbr["title"], self.parserinfo)
 
     @property
     def user(self):

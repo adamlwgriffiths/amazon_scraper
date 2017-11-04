@@ -30,7 +30,7 @@ class SubReview(object):
     This object is different than the one in review.py because the reviews on the
     'reviews' page have a different HTML format. Thus we must parse them differently
     """
-    def __init__(self, api, soup, Id, ItemId):
+    def __init__(self, api, soup, Id, ItemId, parserinfo=None):
         self.soup = soup.find("div", id=Id)
         if not self.soup:
             warnings.warn(
@@ -43,6 +43,7 @@ class SubReview(object):
         self._asin = ItemId
         self._id = Id
         self._url = review_url(self._id)
+        self.parserinfo = parserinfo
 
     def _parse_generic_property(self, var, tag, regex_term):
         if not var:
@@ -84,7 +85,7 @@ class SubReview(object):
     def date(self):
         date = self.soup.find("span", class_=re.compile("review-date"))
         if date:
-            return get_review_date(date.text)
+            return get_review_date(date.text, self.parserinfo)
 
     @property
     def id(self):
@@ -132,7 +133,7 @@ class SubReview(object):
 
 
 class Reviews(object):
-    def __init__(self, api, ItemId=None, URL=None):
+    def __init__(self, api, ItemId=None, URL=None, parserinfo=None):
         self._asin = None
         if ItemId and not URL:
             # check for http://www.amazon.com
@@ -149,6 +150,7 @@ class Reviews(object):
         self.api = api
         self._URL = URL
         self._soup = None
+        self.parserinfo = parserinfo
 
     @property
     @retry()
@@ -168,7 +170,7 @@ class Reviews(object):
     @property
     def brief_reviews(self):
         for review_id in self.ids:
-            yield SubReview(self.api, self.soup, review_id, self.asin)
+            yield SubReview(self.api, self.soup, review_id, self.asin, self.parserinfo)
 
     def __iter__(self):
         page = self

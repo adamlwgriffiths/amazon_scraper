@@ -137,12 +137,12 @@ def add_query(url, **kwargs):
     return urlparse.urlunsplit((scheme, netloc, path, query_string, fragment))
 
 
-def get_review_date(raw_date):
+def get_review_date(raw_date, parserinfo=None):
     string = unicode(raw_date)
     # remove prefix (e.g. 'on', 'vom', 'il', ...) from date string before parsing
     string = ' '.join(string.split(' ')[1:])
     # 2011-11-07T05:50:41Z
-    date = dateutil.parser.parse(string)
+    date = dateutil.parser.parse(string, parserinfo=parserinfo)
     return date
 
 
@@ -204,6 +204,11 @@ def dict_acceptable(obj, k, blacklist=None):
         return False
     return is_property(obj, k)
 
+from amazon_scraper import parserinfo
+
+def get_date_parserinfo(region_str):
+    if region_str == 'DE': return parserinfo.GermanParserInfo()
+    return None
 
 def rate_limit(api):
     # apply rate limiting
@@ -232,13 +237,13 @@ class AmazonScraper(object):
         self.api = AmazonAPI(access_key, secret_key, associate_tag, *args, **kwargs)
 
     def reviews(self, ItemId=None, URL=None):
-        return Reviews(self, ItemId, URL)
+        return Reviews(self, ItemId, URL, parserinfo=get_date_parserinfo(self.api.region))
 
     def review(self, Id=None, URL=None):
-        return Review(self, Id, URL)
+        return Review(self, Id, URL, parserinfo=get_date_parserinfo(self.api.region))
 
     def user_reviews(self, Id=None, URL=None):
-        return UserReviews(self, Id, URL)
+        return UserReviews(self, Id, URL, parserinfo=get_date_parserinfo(self.api.region))
 
     def lookup(self, URL=None, **kwargs):
         if URL:
